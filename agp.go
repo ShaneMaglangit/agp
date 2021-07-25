@@ -140,17 +140,17 @@ func GetPatternGenes(bytes string) (PatternGene, error) {
 	if len(bytes) != 256 {
 		return PatternGene{}, errors.New("bytes must be 256 bit")
 	}
-	return PatternGene{bytes[22:28], bytes[28:34], bytes[34:40]}, nil
+	return PatternGene{bytes[34:40], bytes[40:46], bytes[46:52]}, nil
 }
 
 func GetColorGenes(bytes string) (ColorGene, error) {
 	if len(bytes) != 256 {
 		return ColorGene{}, errors.New("bytes must be 256 bit")
 	}
-	return ColorGene{bytes[40:44], bytes[44:48], bytes[48:52]}, nil
+	return ColorGene{bytes[52:56], bytes[56:60], bytes[60:64]}, nil
 }
 
-var offsetPartMap = map[PartType]int{Eyes: 52, Mouth: 84, Ears: 116, Horn: 148, Back: 180, Tail: 212}
+var offsetPartMap = map[PartType]int{Eyes: 64, Mouth: 96, Ears: 128, Horn: 160, Back: 192, Tail: 224}
 
 func GetPart(partType PartType, region Region, bytes string) (Part, error) {
 	offset := offsetPartMap[partType]
