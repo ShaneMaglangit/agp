@@ -70,8 +70,6 @@ type Region string
 const (
 	Global Region = "global"
 	Japan         = "japan"
-	Mystic        = "mystic"
-	Xmas          = "xmas"
 )
 
 type Tag string
