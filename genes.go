@@ -18,45 +18,45 @@ type GeneBinGroup struct {
 }
 
 type Genes struct {
-	Class    Class  `json:"class"`
-	Region   Region `json:"region"`
-	Tag      Tag
-	BodySkin BodySkin
-	Pattern  PatternGene `json:"pattern"`
-	Color    ColorGene
-	Eyes     Part
-	Ears     Part
-	Horn     Part
-	Mouth    Part
-	Back     Part
-	Tail     Part
+	Class    Class       `json:"class,omitempty"`
+	Region   Region      `json:"region,omitempty"`
+	Tag      Tag         `json:"tag,omitempty"`
+	BodySkin BodySkin    `json:"bodySkin,omitempty"`
+	Pattern  PatternGene `json:"pattern,omitempty"`
+	Color    ColorGene   `json:"color,omitempty"`
+	Eyes     Part        `json:"eyes,omitempty"`
+	Ears     Part        `json:"ears,omitempty"`
+	Horn     Part        `json:"horn,omitempty"`
+	Mouth    Part        `json:"mouth,omitempty"`
+	Back     Part        `json:"back,omitempty"`
+	Tail     Part        `json:"tail,omitempty"`
 }
 
 type Part struct {
-	D      PartGene
-	R1     PartGene
-	R2     PartGene
-	Mystic bool
+	D      PartGene `json:"d1,omitempty"`
+	R1     PartGene `json:"r1,omitempty"`
+	R2     PartGene `json:"r2,omitempty"`
+	Mystic bool     `json:"mystic,omitempty"`
 }
 
 type PartGene struct {
-	PartId       string
-	Class        Class
-	SpecialGenes string
-	Type         PartType
-	Name         string
+	PartId       string   `json:"partId,omitempty"`
+	Class        Class    `json:"class,omitempty"`
+	SpecialGenes string   `json:"specialGenes,omitempty"`
+	Type         PartType `json:"type,omitempty"`
+	Name         string   `json:"name,omitempty"`
 }
 
 type PatternGene struct {
-	D  string
-	R1 string
-	R2 string
+	D  string `json:"d,omitempty"`
+	R1 string `json:"r1,omitempty"`
+	R2 string `json:"r2,omitempty"`
 }
 
 type ColorGene struct {
-	D  string
-	R1 string
-	R2 string
+	D  string `json:"d,omitempty"`
+	R1 string `json:"r1,omitempty"`
+	R2 string `json:"r2,omitempty"`
 }
 
 type PartType string
