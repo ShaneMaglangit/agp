@@ -1,5 +1,6 @@
 package agp
 
+// GeneBinGroup collectively stores each part of the parsed binary representation of the genes.
 type GeneBinGroup struct {
 	Class    string
 	Reserved string
@@ -17,6 +18,7 @@ type GeneBinGroup struct {
 	Tail     string
 }
 
+// Genes contains the overall data about the Axie's gene.
 type Genes struct {
 	Class    Class       `json:"class,omitempty"`
 	Region   Region      `json:"region,omitempty"`
@@ -32,6 +34,7 @@ type Genes struct {
 	Tail     Part        `json:"tail,omitempty"`
 }
 
+// Part stores the dominant and recessive genes of an Axie's part.
 type Part struct {
 	D      PartGene `json:"d1,omitempty"`
 	R1     PartGene `json:"r1,omitempty"`
@@ -39,6 +42,7 @@ type Part struct {
 	Mystic bool     `json:"mystic,omitempty"`
 }
 
+// PartGene holds the data for a single gene of an Axie's part.
 type PartGene struct {
 	PartId       string   `json:"partId,omitempty"`
 	Class        Class    `json:"class,omitempty"`
@@ -47,18 +51,21 @@ type PartGene struct {
 	Name         string   `json:"name,omitempty"`
 }
 
+// PatternGene stores the dominant and recessive genes of an Axie's skin pattern.
 type PatternGene struct {
 	D  string `json:"d,omitempty"`
 	R1 string `json:"r1,omitempty"`
 	R2 string `json:"r2,omitempty"`
 }
 
+// ColorGene stores the dominant and recessive genes of an Axie's color.
 type ColorGene struct {
 	D  string `json:"d,omitempty"`
 	R1 string `json:"r1,omitempty"`
 	R2 string `json:"r2,omitempty"`
 }
 
+// PartType represents each of an Axies body parts including: Eeyes, Ears, Mouth, Horn, Back, Tail.
 type PartType string
 
 const (
@@ -70,6 +77,8 @@ const (
 	Tail           = "tail"
 )
 
+// Class represents the class of a given Axie.
+// A class is among these values: Beast, Bug, Bird, Plant, Aquatic, Reptile, Mech, Dusk, Dawn.
 type Class string
 
 const (
@@ -84,6 +93,7 @@ const (
 	Dawn          = "dawn"
 )
 
+// Region represents the region origin of a given Axie. A region can either be Global or Japan.
 type Region string
 
 const (
@@ -91,6 +101,7 @@ const (
 	Japan         = "japan"
 )
 
+// Tag represents the tag attached to a given Axie. Special Axies may have the title Origin, Meo1, or Meo2 tag.
 type Tag string
 
 const (
@@ -100,6 +111,7 @@ const (
 	Meo2       = "meo2"
 )
 
+// BodySkin represents the special skin of an Axie's body. This can either be none (default) or Frosty.
 type BodySkin string
 
 const (
