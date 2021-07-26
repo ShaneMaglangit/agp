@@ -404,8 +404,8 @@ func TestParseHex(t *testing.T) {
 	}{
 		{
 			"VALID_HEX",
-			"0x20000000081882220c82288a08a2288a0cc0314a082018880c6010840c62194a",
-			"0010000000000000000000000000000000001000000110001000001000100010000011001000001000101000100010100000100010100010001010001000101000001100110000000011000101001010000010000010000000011000100010000000110001100000000100001000010000001100011000100001100101001010",
+			"0x11c642400a028ca14a428c20cc011080c61180a0820180604233082",
+			"0000000000000000000000000000000000000001000111000110010000100100000000001010000000101000110010100001010010100100001010001100001000001100110000000001000100001000000011000110000100011000000010100000100000100000000110000000011000000100001000110011000010000010",
 			false,
 		},
 		{
@@ -434,7 +434,8 @@ func TestParseHex(t *testing.T) {
 				}
 				return
 			}
-			got := fmt.Sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s", gbg.Class, gbg.Reserved, gbg.Region, gbg.Tag, gbg.BodySkin, gbg.Xmas, gbg.Pattern, gbg.Color, gbg.Eyes, gbg.Ears, gbg.Horn, gbg.Mouth, gbg.Back, gbg.Tail)
+			tt.want = fmt.Sprintf("%0*s", 256, tt.want)
+			got := fmt.Sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s", gbg.Class, gbg.Reserved, gbg.Region, gbg.Tag, gbg.BodySkin, gbg.Xmas, gbg.Pattern, gbg.Color, gbg.Eyes, gbg.Mouth, gbg.Ears, gbg.Horn, gbg.Back, gbg.Tail)
 			if !reflect.DeepEqual(got, tt.want) {
 				for i := 0; i < 256; i++ {
 					if got[i] != tt.want[i] {
