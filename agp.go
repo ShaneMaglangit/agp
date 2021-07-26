@@ -123,11 +123,10 @@ func GetClass(gbg *GeneBinGroup) (*Class, error) {
 	if len(gbg.Class) != 4 {
 		return nil, errors.New("pattern binary must be of length 4")
 	}
-	ret, ok := binClassMap[gbg.Class]
-	if !ok {
-		return nil, errors.New("cannot recognize class")
+	if ret, ok := binClassMap[gbg.Class]; ok {
+		return &ret, nil
 	}
-	return &ret, nil
+	return nil, errors.New("cannot recognize class")
 }
 
 var binRegionMap = map[string]Region{"00000": Global, "00001": Japan}
@@ -136,11 +135,10 @@ func GetRegion(gbg *GeneBinGroup) (*Region, error) {
 	if len(gbg.Region) != 5 {
 		return nil, errors.New("region binary must be of length 5")
 	}
-	ret, ok := binRegionMap[gbg.Region]
-	if !ok {
-		return nil, errors.New("cannot recognize region")
+	if ret, ok := binRegionMap[gbg.Region]; ok {
+		return &ret, nil
 	}
-	return &ret, nil
+	return nil, errors.New("cannot recognize region")
 }
 
 var binTagMap = map[string]Tag{"00000": NoTag, "00001": Origin, "00010": Meo1, "00011": Meo2}
@@ -149,11 +147,10 @@ func GetTag(gbg *GeneBinGroup) (*Tag, error) {
 	if len(gbg.Tag) != 5 {
 		return nil, errors.New("tag binary must be of length 5")
 	}
-	ret, ok := binTagMap[gbg.Tag]
-	if !ok {
-		return nil, errors.New("cannot recognize tag")
+	if ret, ok := binTagMap[gbg.Tag]; ok {
+		return &ret, nil
 	}
-	return &ret, nil
+	return nil, errors.New("cannot recognize tag")
 }
 
 var binBodySkinMap = map[string]BodySkin{"0000": DefBodySkin, "0001": Frosty}
@@ -162,11 +159,10 @@ func GetBodySkin(gbg *GeneBinGroup) (*BodySkin, error) {
 	if len(gbg.BodySkin) != 4 {
 		return nil, errors.New("body skin binary must be of length 4")
 	}
-	ret, ok := binBodySkinMap[gbg.BodySkin]
-	if !ok {
-		return nil, errors.New("cannot recognize body skin")
+	if ret, ok := binBodySkinMap[gbg.BodySkin]; ok {
+		return &ret, nil
 	}
-	return &ret, nil
+	return nil, errors.New("cannot recognize body skin")
 }
 
 func GetPatternGenes(gbg *GeneBinGroup) (*PatternGene, error) {
