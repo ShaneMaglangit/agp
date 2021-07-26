@@ -37,31 +37,38 @@ func ParseHex(hex string) (*GeneBinGroup, error) {
 		return nil, err
 	}
 	bStr := fmt.Sprintf("%0*s", 256, bInt.Text(2))
-	if len(bStr) != 256 {
-		return nil, errors.New("gene must be 256 bit")
-	}
 	return &GeneBinGroup{
 		Class:    bStr[0:4],
+		Reserved: bStr[4:8],
 		Region:   bStr[8:13],
 		Tag:      bStr[13:18],
 		BodySkin: bStr[18:22],
+		Xmas:     bStr[22:34],
 		Pattern:  bStr[34:52],
 		Color:    bStr[52:64],
 		Eyes:     bStr[64:96],
-		Ears:     bStr[96:128],
-		Horn:     bStr[128:160],
-		Mouth:    bStr[160:192],
+		Mouth:    bStr[96:128],
+		Ears:     bStr[128:160],
+		Horn:     bStr[160:192],
 		Back:     bStr[192:224],
 		Tail:     bStr[224:256],
 	}, nil
 }
 
-func Decode(gbg GeneBinGroup) (*Genes, error) {
+func Decode(gbg *GeneBinGroup) (*Genes, error) {
 	class, err := GetClass(gbg)
 	if err != nil {
 		return nil, err
 	}
 	region, err := GetRegion(gbg)
+	if err != nil {
+		return nil, err
+	}
+	tag, err := GetTag(gbg)
+	if err != nil {
+		return nil, err
+	}
+	bodySkin, err := GetBodySkin(gbg)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +104,7 @@ func Decode(gbg GeneBinGroup) (*Genes, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Genes{class, region, pattern, color, eyes, ears, horn, mouth, back, tail}, nil
+	return &Genes{*class, *region, *tag, *bodySkin, *pattern, *color, *eyes, *ears, *horn, *mouth, *back, *tail}, nil
 }
 
 var binClassMap = map[string]Class{
@@ -112,7 +119,10 @@ var binClassMap = map[string]Class{
 	"0111": Dawn,
 }
 
-func GetClass(gbg GeneBinGroup) (*Class, error) {
+func GetClass(gbg *GeneBinGroup) (*Class, error) {
+	if len(gbg.Class) != 4 {
+		return nil, errors.New("pattern binary must be of length 4")
+	}
 	ret, ok := binClassMap[gbg.Class]
 	if !ok {
 		return nil, errors.New("cannot recognize class")
@@ -122,7 +132,10 @@ func GetClass(gbg GeneBinGroup) (*Class, error) {
 
 var binRegionMap = map[string]Region{"00000": Global, "00001": Japan}
 
-func GetRegion(gbg GeneBinGroup) (*Region, error) {
+func GetRegion(gbg *GeneBinGroup) (*Region, error) {
+	if len(gbg.Region) != 5 {
+		return nil, errors.New("region binary must be of length 5")
+	}
 	ret, ok := binRegionMap[gbg.Region]
 	if !ok {
 		return nil, errors.New("cannot recognize region")
@@ -132,7 +145,10 @@ func GetRegion(gbg GeneBinGroup) (*Region, error) {
 
 var binTagMap = map[string]Tag{"00000": NoTag, "00001": Origin, "00010": Meo1, "00011": Meo2}
 
-func GetTag(gbg GeneBinGroup) (*Tag, error) {
+func GetTag(gbg *GeneBinGroup) (*Tag, error) {
+	if len(gbg.Tag) != 5 {
+		return nil, errors.New("tag binary must be of length 5")
+	}
 	ret, ok := binTagMap[gbg.Tag]
 	if !ok {
 		return nil, errors.New("cannot recognize tag")
@@ -142,7 +158,10 @@ func GetTag(gbg GeneBinGroup) (*Tag, error) {
 
 var binBodySkinMap = map[string]BodySkin{"0000": DefBodySkin, "0001": Frosty}
 
-func GetBodySkin(gbg GeneBinGroup) (*BodySkin, error) {
+func GetBodySkin(gbg *GeneBinGroup) (*BodySkin, error) {
+	if len(gbg.BodySkin) != 4 {
+		return nil, errors.New("body skin binary must be of length 4")
+	}
 	ret, ok := binBodySkinMap[gbg.BodySkin]
 	if !ok {
 		return nil, errors.New("cannot recognize body skin")
@@ -150,7 +169,10 @@ func GetBodySkin(gbg GeneBinGroup) (*BodySkin, error) {
 	return &ret, nil
 }
 
-func GetPatternGenes(gbg GeneBinGroup) (*PatternGene, error) {
+func GetPatternGenes(gbg *GeneBinGroup) (*PatternGene, error) {
+	if len(gbg.Pattern) != 18 {
+		return nil, errors.New("pattern binary must be of length 18")
+	}
 	return &PatternGene{gbg.Pattern[0:6], gbg.Pattern[6:12], gbg.Pattern[12:18]}, nil
 }
 
@@ -166,7 +188,10 @@ var classColorMap = map[Class]map[string]string{
 	Dawn:    {"0010": "D9D9D9", "0011": "D9D9D9", "0100": "D9D9D9", "0110": "D9D9D9"},
 }
 
-func GetColorGenes(gbg GeneBinGroup) (*ColorGene, error) {
+func GetColorGenes(gbg *GeneBinGroup) (*ColorGene, error) {
+	if len(gbg.Color) != 12 {
+		return nil, errors.New("color binary must be of length 12")
+	}
 	class, err := GetClass(gbg)
 	if err != nil {
 		return nil, err
@@ -174,7 +199,7 @@ func GetColorGenes(gbg GeneBinGroup) (*ColorGene, error) {
 	return &ColorGene{classColorMap[*class][gbg.Color[0:4]], classColorMap[*class][gbg.Color[4:8]], classColorMap[*class][gbg.Color[8:12]]}, nil
 }
 
-func GetPart(partType PartType, gbg GeneBinGroup) (*Part, error) {
+func GetPart(partType PartType, gbg *GeneBinGroup) (*Part, error) {
 	var partBin string
 	switch partType {
 	case Eyes:
@@ -189,6 +214,10 @@ func GetPart(partType PartType, gbg GeneBinGroup) (*Part, error) {
 		partBin = gbg.Back
 	default:
 		partBin = gbg.Tail
+	}
+
+	if len(partBin) != 32 {
+		return nil, errors.New(fmt.Sprintf("%s binary must be of length 32", partType))
 	}
 
 	region, err := GetRegion(gbg)
@@ -231,7 +260,7 @@ func GetPart(partType PartType, gbg GeneBinGroup) (*Part, error) {
 		return nil, err
 	}
 
-	return &Part{d, r1, r2, skinBin == "11"}, nil
+	return &Part{*d, *r1, *r2, skinBin == "11"}, nil
 }
 
 func GetPartName(class Class, partType PartType, region Region, partBin string, skinBin string) (string, error) {
@@ -246,7 +275,7 @@ func GetPartName(class Class, partType PartType, region Region, partBin string, 
 	if partName, ok := traitsJson[class][partType][partBin][partSkin]; ok {
 		return partName, nil
 	}
-	return "", errors.New("error finding suitable part name")
+	return "", errors.New(fmt.Sprintf("error finding suitable part name: %s -> %s -> %s -> %s", class, partType, partBin, partSkin))
 }
 
 func GetPartGene(partType PartType, partName string) (*PartGene, error) {
@@ -260,10 +289,13 @@ func GetPartGene(partType PartType, partName string) (*PartGene, error) {
 	if partGene, ok := partsJson[partId]; ok {
 		return &partGene, nil
 	}
-	return nil, errors.New("error finding suitable part name")
+	return nil, errors.New(fmt.Sprintf("error finding suitable part gene for %s", partId))
 }
 
 func GetPartSkin(region Region, skinBin string) (string, error) {
+	if len(skinBin) != 2 {
+		return "", errors.New("skin binary must be of length 2")
+	}
 	switch skinBin {
 	case "00":
 		return string(region), nil

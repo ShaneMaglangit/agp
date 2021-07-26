@@ -2,9 +2,11 @@ package agp
 
 type GeneBinGroup struct {
 	Class    string
+	Reserved string
 	Region   string
 	Tag      string
 	BodySkin string
+	Xmas     string
 	Pattern  string
 	Color    string
 	Eyes     string
@@ -16,30 +18,32 @@ type GeneBinGroup struct {
 }
 
 type Genes struct {
-	Class   *Class       `json:"class"`
-	Region  *Region      `json:"region"`
-	Pattern *PatternGene `json:"pattern"`
-	Color   *ColorGene
-	Eyes    *Part
-	Ears    *Part
-	Horn    *Part
-	Mouth   *Part
-	Back    *Part
-	Tail    *Part
+	Class    Class  `json:"class"`
+	Region   Region `json:"region"`
+	Tag      Tag
+	BodySkin BodySkin
+	Pattern  PatternGene `json:"pattern"`
+	Color    ColorGene
+	Eyes     Part
+	Ears     Part
+	Horn     Part
+	Mouth    Part
+	Back     Part
+	Tail     Part
 }
 
 type Part struct {
-	D      *PartGene
-	R1     *PartGene
-	R2     *PartGene
+	D      PartGene
+	R1     PartGene
+	R2     PartGene
 	Mystic bool
 }
 
 type PartGene struct {
 	PartId       string
-	Class        *Class
-	SpecialGenes *string
-	Type         *PartType
+	Class        Class
+	SpecialGenes string
+	Type         PartType
 	Name         string
 }
 
