@@ -14,7 +14,7 @@ var traitsJson []byte
 
 type TraitsJSON map[Class]map[PartType]map[string]map[string]string
 
-func GetTraitsJSON() (TraitsJSON, error) {
+func getTraitsJSON() (TraitsJSON, error) {
 	var ret TraitsJSON
 	err := json.Unmarshal(traitsJson, &ret)
 	return ret, err
@@ -25,65 +25,79 @@ var partsJson []byte
 
 type PartsJSON map[string]PartGene
 
-func GetPartsJSON() (PartsJSON, error) {
+func getPartsJSON() (PartsJSON, error) {
 	var ret PartsJSON
 	err := json.Unmarshal(partsJson, &ret)
 	return ret, err
 }
 
-func Decode(gene string) (Genes, error) {
-	if len(gene) != 256 {
-		return Genes{}, errors.New("gene must be 256 bit")
-	}
-	class, err := GetClass(gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	region, err := GetRegion(gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	pattern, err := GetPatternGenes(gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	color, err := GetColorGenes(gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	eyes, err := GetPart(Eyes, region, gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	ears, err := GetPart(Ears, region, gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	horn, err := GetPart(Horn, region, gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	mouth, err := GetPart(Mouth, region, gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	back, err := GetPart(Back, region, gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	tail, err := GetPart(Tail, region, gene)
-	if err != nil {
-		return Genes{}, err
-	}
-	return Genes{class, region, pattern, color, eyes, ears, horn, mouth, back, tail}, nil
-}
-
-func ParseHex(hex string) (string, error) {
+func ParseHex(hex string) (*GeneBinGroup, error) {
 	bInt, err := hexutil.DecodeBig(hex)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("%0*s", 256, bInt.Text(2)), nil
+	bStr := fmt.Sprintf("%0*s", 256, bInt.Text(2))
+	if len(bStr) != 256 {
+		return nil, errors.New("gene must be 256 bit")
+	}
+	return &GeneBinGroup{
+		Class:    bStr[0:4],
+		Region:   bStr[8:13],
+		Tag:      bStr[13:18],
+		BodySkin: bStr[18:22],
+		Pattern:  bStr[34:52],
+		Color:    bStr[52:64],
+		Eyes:     bStr[64:96],
+		Ears:     bStr[96:128],
+		Horn:     bStr[128:160],
+		Mouth:    bStr[160:192],
+		Back:     bStr[192:224],
+		Tail:     bStr[224:256],
+	}, nil
+}
+
+func Decode(gbg GeneBinGroup) (*Genes, error) {
+	class, err := GetClass(gbg)
+	if err != nil {
+		return nil, err
+	}
+	region, err := GetRegion(gbg)
+	if err != nil {
+		return nil, err
+	}
+	pattern, err := GetPatternGenes(gbg)
+	if err != nil {
+		return nil, err
+	}
+	color, err := GetColorGenes(gbg)
+	if err != nil {
+		return nil, err
+	}
+	eyes, err := GetPart(Eyes, gbg)
+	if err != nil {
+		return nil, err
+	}
+	ears, err := GetPart(Ears, gbg)
+	if err != nil {
+		return nil, err
+	}
+	horn, err := GetPart(Horn, gbg)
+	if err != nil {
+		return nil, err
+	}
+	mouth, err := GetPart(Mouth, gbg)
+	if err != nil {
+		return nil, err
+	}
+	back, err := GetPart(Back, gbg)
+	if err != nil {
+		return nil, err
+	}
+	tail, err := GetPart(Tail, gbg)
+	if err != nil {
+		return nil, err
+	}
+	return &Genes{class, region, pattern, color, eyes, ears, horn, mouth, back, tail}, nil
 }
 
 var binClassMap = map[string]Class{
@@ -98,99 +112,126 @@ var binClassMap = map[string]Class{
 	"0111": Dawn,
 }
 
-func GetClass(bytes string) (Class, error) {
-	ret, ok := binClassMap[bytes[0:4]]
+func GetClass(gbg GeneBinGroup) (*Class, error) {
+	ret, ok := binClassMap[gbg.Class]
 	if !ok {
-		return ret, errors.New("cannot recognize class")
+		return nil, errors.New("cannot recognize class")
 	}
-	return ret, nil
+	return &ret, nil
 }
 
 var binRegionMap = map[string]Region{"00000": Global, "00001": Japan}
 
-func GetRegion(bytes string) (Region, error) {
-	ret, ok := binRegionMap[bytes[8:13]]
+func GetRegion(gbg GeneBinGroup) (*Region, error) {
+	ret, ok := binRegionMap[gbg.Region]
 	if !ok {
-		return ret, errors.New("cannot recognize region")
+		return nil, errors.New("cannot recognize region")
 	}
-	return ret, nil
+	return &ret, nil
 }
 
 var binTagMap = map[string]Tag{"00000": NoTag, "00001": Origin, "00010": Meo1, "00011": Meo2}
 
-func GetTag(bytes string) (Tag, error) {
-	ret, ok := binTagMap[bytes[13:18]]
+func GetTag(gbg GeneBinGroup) (*Tag, error) {
+	ret, ok := binTagMap[gbg.Tag]
 	if !ok {
-		return ret, errors.New("cannot recognize tag")
+		return nil, errors.New("cannot recognize tag")
 	}
-	return ret, nil
+	return &ret, nil
 }
 
 var binBodySkinMap = map[string]BodySkin{"0000": DefBodySkin, "0001": Frosty}
 
-func GetBodySkin(bytes string) (BodySkin, error) {
-	ret, ok := binBodySkinMap[bytes[18:22]]
+func GetBodySkin(gbg GeneBinGroup) (*BodySkin, error) {
+	ret, ok := binBodySkinMap[gbg.BodySkin]
 	if !ok {
-		return ret, errors.New("cannot recognize body skin")
+		return nil, errors.New("cannot recognize body skin")
 	}
-	return ret, nil
+	return &ret, nil
 }
 
-func GetPatternGenes(bytes string) (PatternGene, error) {
-	if len(bytes) != 256 {
-		return PatternGene{}, errors.New("bytes must be 256 bit")
-	}
-	return PatternGene{bytes[34:40], bytes[40:46], bytes[46:52]}, nil
+func GetPatternGenes(gbg GeneBinGroup) (*PatternGene, error) {
+	return &PatternGene{gbg.Pattern[0:6], gbg.Pattern[6:12], gbg.Pattern[12:18]}, nil
 }
 
-func GetColorGenes(bytes string) (ColorGene, error) {
-	if len(bytes) != 256 {
-		return ColorGene{}, errors.New("bytes must be 256 bit")
-	}
-	return ColorGene{bytes[52:56], bytes[56:60], bytes[60:64]}, nil
+var classColorMap = map[Class]map[string]string{
+	Beast:   {"0010": "ffec51", "0011": "ffa12a", "0100": "f0c66e", "0110": "60afce"},
+	Bug:     {"0010": "ff7183", "0011": "ff6d61", "0100": "f74e4e"},
+	Bird:    {"0010": "ff9ab8", "0011": "ffb4bb", "0100": "ff778e"},
+	Plant:   {"0010": "ccef5e", "0011": "efd636", "0100": "c5ffd9"},
+	Aquatic: {"0010": "4cffdf", "0011": "2de8f2", "0100": "759edb", "0110": "ff5a71"},
+	Reptile: {"0010": "fdbcff", "0011": "ef93ff", "0100": "f5e1ff", "0110": "43e27d"},
+	Mech:    {"0010": "D9D9D9", "0011": "D9D9D9", "0100": "D9D9D9", "0110": "D9D9D9"},
+	Dusk:    {"0010": "D9D9D9", "0011": "D9D9D9", "0100": "D9D9D9", "0110": "D9D9D9"},
+	Dawn:    {"0010": "D9D9D9", "0011": "D9D9D9", "0100": "D9D9D9", "0110": "D9D9D9"},
 }
 
-var offsetPartMap = map[PartType]int{Eyes: 64, Mouth: 96, Ears: 128, Horn: 160, Back: 192, Tail: 224}
-
-func GetPart(partType PartType, region Region, bytes string) (Part, error) {
-	offset := offsetPartMap[partType]
-
-	skinBin := bytes[offset+0 : offset+2]
-
-	dClass := binClassMap[bytes[offset+2:offset+6]]
-	dBin := bytes[offset+6 : offset+12]
-	dName, err := GetPartName(dClass, partType, region, dBin, skinBin)
+func GetColorGenes(gbg GeneBinGroup) (*ColorGene, error) {
+	class, err := GetClass(gbg)
 	if err != nil {
-		return Part{}, err
+		return nil, err
+	}
+	return &ColorGene{classColorMap[*class][gbg.Color[0:4]], classColorMap[*class][gbg.Color[4:8]], classColorMap[*class][gbg.Color[8:12]]}, nil
+}
+
+func GetPart(partType PartType, gbg GeneBinGroup) (*Part, error) {
+	var partBin string
+	switch partType {
+	case Eyes:
+		partBin = gbg.Eyes
+	case Ears:
+		partBin = gbg.Ears
+	case Horn:
+		partBin = gbg.Horn
+	case Mouth:
+		partBin = gbg.Mouth
+	case Back:
+		partBin = gbg.Back
+	default:
+		partBin = gbg.Tail
+	}
+
+	region, err := GetRegion(gbg)
+	if err != nil {
+		return nil, err
+	}
+
+	skinBin := partBin[0:2]
+
+	dClass := binClassMap[partBin[2:6]]
+	dBin := partBin[6:12]
+	dName, err := GetPartName(dClass, partType, *region, dBin, skinBin)
+	if err != nil {
+		return nil, err
 	}
 	d, err := GetPartGene(partType, dName)
 	if err != nil {
-		return Part{}, err
+		return nil, err
 	}
 
-	r1Class := binClassMap[bytes[offset+12:offset+16]]
-	r1Bin := bytes[offset+16 : offset+22]
-	r1Name, err := GetPartName(r1Class, partType, region, r1Bin, "00")
+	r1Class := binClassMap[partBin[12:16]]
+	r1Bin := partBin[16:22]
+	r1Name, err := GetPartName(r1Class, partType, *region, r1Bin, "00")
 	if err != nil {
-		return Part{}, err
+		return nil, err
 	}
 	r1, err := GetPartGene(partType, r1Name)
 	if err != nil {
-		return Part{}, err
+		return nil, err
 	}
 
-	r2Class := binClassMap[bytes[offset+22:offset+26]]
-	r2Bin := bytes[offset+26 : offset+32]
-	r2Name, err := GetPartName(r2Class, partType, region, r2Bin, "00")
+	r2Class := binClassMap[partBin[22:26]]
+	r2Bin := partBin[26:32]
+	r2Name, err := GetPartName(r2Class, partType, *region, r2Bin, "00")
 	if err != nil {
-		return Part{}, err
+		return nil, err
 	}
 	r2, err := GetPartGene(partType, r2Name)
 	if err != nil {
-		return Part{}, err
+		return nil, err
 	}
 
-	return Part{d, r1, r2, skinBin == "11"}, nil
+	return &Part{d, r1, r2, skinBin == "11"}, nil
 }
 
 func GetPartName(class Class, partType PartType, region Region, partBin string, skinBin string) (string, error) {
@@ -198,7 +239,7 @@ func GetPartName(class Class, partType PartType, region Region, partBin string, 
 	if err != nil {
 		return "", err
 	}
-	traitsJson, err := GetTraitsJSON()
+	traitsJson, err := getTraitsJSON()
 	if err != nil {
 		return "", err
 	}
@@ -208,18 +249,18 @@ func GetPartName(class Class, partType PartType, region Region, partBin string, 
 	return "", errors.New("error finding suitable part name")
 }
 
-func GetPartGene(partType PartType, partName string) (PartGene, error) {
+func GetPartGene(partType PartType, partName string) (*PartGene, error) {
 	partName = strings.ReplaceAll(strings.ToLower(partName), " ", "-")
 	partName = strings.ReplaceAll(partName, "'", "")
 	partId := fmt.Sprintf("%s-%s", partType, partName)
-	partsJson, err := GetPartsJSON()
+	partsJson, err := getPartsJSON()
 	if err != nil {
-		return PartGene{}, err
+		return nil, err
 	}
 	if partGene, ok := partsJson[partId]; ok {
-		return partGene, nil
+		return &partGene, nil
 	}
-	return PartGene{}, errors.New("error finding suitable part name")
+	return nil, errors.New("error finding suitable part name")
 }
 
 func GetPartSkin(region Region, skinBin string) (string, error) {
