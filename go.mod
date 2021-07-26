@@ -1,4 +1,4 @@
-module agp
+module github.com/shanemaglangit/agp
 
 go 1.16
 
