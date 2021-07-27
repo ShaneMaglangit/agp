@@ -4,7 +4,7 @@
 
 Package `agp` is a gene parsing package for Axie Infinity.
 
-The name agp stands for "Axie Gene Parse" which decodes the hex representation of an Axie's gene into a human readable format.
+The name agp stands for "Axie Gene Parser" which decodes the hex representation of an Axie's gene into a human readable format.
 
 ---
 
