@@ -27,9 +27,9 @@ type Genes struct {
 	Pattern  PatternGene `json:"pattern,omitempty"`
 	Color    ColorGene   `json:"color,omitempty"`
 	Eyes     Part        `json:"eyes,omitempty"`
+	Mouth    Part        `json:"mouth,omitempty"`
 	Ears     Part        `json:"ears,omitempty"`
 	Horn     Part        `json:"horn,omitempty"`
-	Mouth    Part        `json:"mouth,omitempty"`
 	Back     Part        `json:"back,omitempty"`
 	Tail     Part        `json:"tail,omitempty"`
 }
