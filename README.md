@@ -9,7 +9,7 @@ The name agp stands for "Axie Gene Parse" which decodes the hex representation o
 ---
 
 * [Install](#install)
-* [Usage](#examples)
+* [Usage](#usage)
 
 ---
 
@@ -21,7 +21,7 @@ With a [correctly configured](https://golang.org/doc/install#testing) Go toolcha
 go get -u github.com/shanemaglangit/agp
 ```
 
-## Examples
+## Usage
 
 To get started, you'll first need to get the gene of an Axie in hex. You may use the [Axie Infinity GraphQL endpoint](https://axie-graphql.web.app/) to get this detail. For this example, let's use the hex `0x11c642400a028ca14a428c20cc011080c61180a0820180604233082`
 
