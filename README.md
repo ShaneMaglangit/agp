@@ -1,5 +1,6 @@
 # agp
 
+[![Go project version](https://badge.fury.io/go/github.com%2Fshanemaglangit%2Fagp.svg)](https://badge.fury.io/go/github.com%2Fshanemaglangit%2Fagp)
 [![GoDoc](https://pkg.go.dev/badge/github.com/shanemaglangit/agp?utm_source=godoc)](https://godoc.org/github.com/shanemaglangit/agp)
 
 Package `agp` is a gene parsing package for Axie Infinity.
