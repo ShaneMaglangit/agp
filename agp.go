@@ -129,7 +129,7 @@ var binClassMap = map[string]Class{
 	"0101": Reptile,
 	"1000": Mech,
 	"1010": Dusk,
-	"0111": Dawn,
+	"1001": Dawn,
 }
 
 // GetClass extracts the gene class from the gene binary group.
