@@ -1,10 +1,13 @@
 # agp
 
+[![Go project version](https://badge.fury.io/go/github.com%2Fshanemaglangit%2Fagp.svg)](https://badge.fury.io/go/github.com%2Fshanemaglangit%2Fagp)
 [![GoDoc](https://pkg.go.dev/badge/github.com/shanemaglangit/agp?utm_source=godoc)](https://godoc.org/github.com/shanemaglangit/agp)
 
 Package `agp` is a gene parsing package for Axie Infinity.
 
 The name agp stands for "Axie Gene Parser" which decodes the hex representation of an Axie's gene into a human readable format.
+
+> Only supports 256 bit genes
 
 ---
 
@@ -79,3 +82,17 @@ The generated output should look like this
   },
 }
 ```
+
+## NPM Support
+
+I also released a similar package for NPM. [Do check it out!](https://github.com/ShaneMaglangit/agp-npm)
+
+## Support the Author
+
+Love this module? Feel free to buy me a coffee and motivate me to work on more stuffs like this!
+
+**Ronin Address:** ronin:789c9b253eba265f0079e3ebcaaea2503eb31bb3  
+**ETH Address:** 0x9F50E3606caf22ff5E0E03F0eb02DE3Fa2786535  
+**Paypal:** paypal.me/shanemaglangit  
+
+Support does not need to have any monetary value. I would also appreciate if you leave a star!
