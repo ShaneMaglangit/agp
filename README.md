@@ -26,9 +26,9 @@ go get -u github.com/shanemaglangit/agp
 
 ## Usage
 
-To get started, you'll first need to get the gene of an Axie in hex. You may use the [Axie Infinity GraphQL endpoint](https://axie-graphql.web.app/) to get this detail. For this example, let's use the hex `0x11c642400a028ca14a428c20cc011080c61180a0820180604233082`
-
 > Starting on v1.0.3, `ParseHexDecode` was introduced which combines both `ParseHex` and `Decode` into a single function.
+
+To get started, you'll first need to get the gene of an Axie in hex. You may use the [Axie Infinity GraphQL endpoint](https://axie-graphql.web.app/) to get this detail. For this example, let's use the hex `0x11c642400a028ca14a428c20cc011080c61180a0820180604233082`
 
 Let us first parse this hex into a GeneBinGroup object. `ParseHex()` first converts the given hex into its binary format. It thens divides these binary bits into their own respective groups, each representing a certain attribute of the Axie's gene.
 
