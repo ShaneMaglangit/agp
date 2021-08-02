@@ -20,18 +20,19 @@ type GeneBinGroup struct {
 
 // Genes contains the overall data about the Axie's gene.
 type Genes struct {
-	Class    Class       `json:"class,omitempty"`
-	Region   Region      `json:"region,omitempty"`
-	Tag      Tag         `json:"tag,omitempty"`
-	BodySkin BodySkin    `json:"bodySkin,omitempty"`
-	Pattern  PatternGene `json:"pattern,omitempty"`
-	Color    ColorGene   `json:"color,omitempty"`
-	Eyes     Part        `json:"eyes,omitempty"`
-	Mouth    Part        `json:"mouth,omitempty"`
-	Ears     Part        `json:"ears,omitempty"`
-	Horn     Part        `json:"horn,omitempty"`
-	Back     Part        `json:"back,omitempty"`
-	Tail     Part        `json:"tail,omitempty"`
+	Class       Class       `json:"class,omitempty"`
+	Region      Region      `json:"region,omitempty"`
+	Tag         Tag         `json:"tag,omitempty"`
+	BodySkin    BodySkin    `json:"bodySkin,omitempty"`
+	Pattern     PatternGene `json:"pattern,omitempty"`
+	Color       ColorGene   `json:"color,omitempty"`
+	Eyes        Part        `json:"eyes,omitempty"`
+	Mouth       Part        `json:"mouth,omitempty"`
+	Ears        Part        `json:"ears,omitempty"`
+	Horn        Part        `json:"horn,omitempty"`
+	Back        Part        `json:"back,omitempty"`
+	Tail        Part        `json:"tail,omitempty"`
+	GeneQuality float64     `json:"geneQuality,omitempty"`
 }
 
 // Part stores the dominant and recessive genes of an Axie's part.

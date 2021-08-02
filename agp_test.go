@@ -73,19 +73,19 @@ func TestGetBodySkin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetBodySkin(tt.bin)
+			got, err := getBodySkin(tt.bin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetBodySkin() expected an error")
+				t.Fatalf("getBodySkin() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetBodySkin() unexpected error = %v", err)
+					t.Fatalf("getBodySkin() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(*got, tt.want) {
-				t.Fatalf("GetBodySkin() got = %v, want %v", *got, tt.want)
+				t.Fatalf("getBodySkin() got = %v, want %v", *got, tt.want)
 			}
 		})
 	}
@@ -103,19 +103,19 @@ func TestGetClass(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetClass(tt.bin)
+			got, err := getClass(tt.bin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetClass() expected an error")
+				t.Fatalf("getClass() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetClass() unexpected error = %v", err)
+					t.Fatalf("getClass() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(*got, tt.want) {
-				t.Fatalf("GetClass() got = %v, want %v", *got, tt.want)
+				t.Fatalf("getClass() got = %v, want %v", *got, tt.want)
 			}
 		})
 	}
@@ -134,19 +134,19 @@ func TestGetColorGenes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetColorGenes(tt.bin)
+			got, err := getColorGenes(tt.bin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetColorGenes() expected an error")
+				t.Fatalf("getColorGenes() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetColorGenes() unexpected error = %v", err)
+					t.Fatalf("getColorGenes() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("GetColorGenes() got = %v, want %v", got, tt.want)
+				t.Fatalf("getColorGenes() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -177,19 +177,19 @@ func TestGetPart(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetPart(tt.args.partType, tt.args.gbg)
+			got, err := getPart(tt.args.partType, tt.args.gbg)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetPart() expected an error")
+				t.Fatalf("getPart() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetPart() unexpected error = %v", err)
+					t.Fatalf("getPart() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("GetPart() got = %v, want %v", got, tt.want)
+				t.Fatalf("getPart() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -212,19 +212,19 @@ func TestGetPartGene(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetPartGene(tt.args.partType, tt.args.partName)
+			got, err := getPartGene(tt.args.partType, tt.args.partName)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetPartGene() expected an error")
+				t.Fatalf("getPartGene() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetPartGene() unexpected error = %v", err)
+					t.Fatalf("getPartGene() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("GetPartGene() got = %v, want %v", got, tt.want)
+				t.Fatalf("getPartGene() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -249,19 +249,19 @@ func TestGetPartName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetPartName(tt.args.class, tt.args.partType, tt.args.region, tt.args.partBin, tt.args.skinBin)
+			got, err := getPartName(tt.args.class, tt.args.partType, tt.args.region, tt.args.partBin, tt.args.skinBin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetPartName() expected an error")
+				t.Fatalf("getPartName() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetPartName() unexpected error = %v", err)
+					t.Fatalf("getPartName() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("GetPartName() got = %v, want %v", got, tt.want)
+				t.Fatalf("getPartName() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -285,19 +285,19 @@ func TestGetPartSkin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetPartSkin(tt.args.region, tt.args.skinBin)
+			got, err := getPartSkin(tt.args.region, tt.args.skinBin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetPartSkin() expected an error")
+				t.Fatalf("getPartSkin() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetPartSkin() unexpected error = %v", err)
+					t.Fatalf("getPartSkin() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("GetPartSkin() got = %v, want %v", got, tt.want)
+				t.Fatalf("getPartSkin() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -315,19 +315,19 @@ func TestGetPatternGenes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetPatternGenes(tt.bin)
+			got, err := getPatternGenes(tt.bin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetPatternGenes() expected an error")
+				t.Fatalf("getPatternGenes() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetPatternGenes() unexpected error = %v", err)
+					t.Fatalf("getPatternGenes() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("GetPatternGenes() got = %v, want %v", got, tt.want)
+				t.Fatalf("getPatternGenes() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -346,19 +346,19 @@ func TestGetRegion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetRegion(tt.bin)
+			got, err := getRegion(tt.bin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetRegion() expected an error")
+				t.Fatalf("getRegion() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetRegion() unexpected error = %v", err)
+					t.Fatalf("getRegion() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(*got, tt.want) {
-				t.Fatalf("GetRegion() got = %v, want %v", *got, tt.want)
+				t.Fatalf("getRegion() got = %v, want %v", *got, tt.want)
 			}
 		})
 	}
@@ -377,19 +377,19 @@ func TestGetTag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetTag(tt.bin)
+			got, err := getTag(tt.bin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("GetTag() expected an error")
+				t.Fatalf("getTag() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("GetTag() unexpected error = %v", err)
+					t.Fatalf("getTag() unexpected error = %v", err)
 				}
 				return
 			}
 			if !reflect.DeepEqual(*got, tt.want) {
-				t.Fatalf("GetTag() got = %v, want %v", *got, tt.want)
+				t.Fatalf("getTag() got = %v, want %v", *got, tt.want)
 			}
 		})
 	}
@@ -443,6 +443,26 @@ func TestParseHex(t *testing.T) {
 						return
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestGetGeneQuality(t *testing.T) {
+	tests := []struct {
+		name string
+		hex  string
+		want float64
+	}{
+		{"ZERO_QUALITY", "0x10000000080c144410a0294208a220881040080a0c24180410c3194200200904", 0},
+		{"MID_QUALITY", "0xd34c44414a028c40023114400802082004130040025280200a0280a", 75.33},
+		{"HIGH_QUALITY", "0x30000000041040230c4310c40c2308c20ca330ca0c6318ca0cc330cc0c2308c2", 100},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			genes, _ := ParseHexDecode(tt.hex)
+			if got := getGeneQuality(*genes); got != tt.want {
+				t.Fatalf("getGeneQuality() = %v, want %v", got, tt.want)
 			}
 		})
 	}
