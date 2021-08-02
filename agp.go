@@ -170,7 +170,7 @@ func getRegion(gbg *GeneBinGroup) (*Region, error) {
 	return nil, errors.New("cannot recognize region")
 }
 
-var binTagMap = map[string]Tag{"00000": NoTag, "00001": Origin, "00010": Meo1, "00011": Meo2}
+var binTagMap = map[string]Tag{"00000": NoTag, "00001": Origin, "00011": Meo1, "00100": Meo2}
 
 // getTag extracts the tag from the gene binary group. It will return one among the values: Origin, Meo1, Meo2,
 // an empty string (default).
@@ -257,18 +257,12 @@ func getPart(partType PartType, gbg *GeneBinGroup) (*Part, error) {
 		return nil, errors.New(fmt.Sprintf("%s binary must be of length 32", partType))
 	}
 
-	// Get the region of the Axie.
-	region, err := getRegion(gbg)
-	if err != nil {
-		return nil, err
-	}
-
 	skinBin := partBin[0:2]
 
 	// Get the dominant genes
 	dClass := binClassMap[partBin[2:6]]
 	dBin := partBin[6:12]
-	dName, err := getPartName(dClass, partType, *region, dBin, skinBin)
+	dName, err := getPartName(dClass, partType, gbg.Region, gbg.Xmas, dBin, skinBin)
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +274,7 @@ func getPart(partType PartType, gbg *GeneBinGroup) (*Part, error) {
 	// Get the recessive 1 genes
 	r1Class := binClassMap[partBin[12:16]]
 	r1Bin := partBin[16:22]
-	r1Name, err := getPartName(r1Class, partType, *region, r1Bin, "00")
+	r1Name, err := getPartName(r1Class, partType, gbg.Region, gbg.Xmas, r1Bin, "00")
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +286,7 @@ func getPart(partType PartType, gbg *GeneBinGroup) (*Part, error) {
 	// Get the recessive 2 genes
 	r2Class := binClassMap[partBin[22:26]]
 	r2Bin := partBin[26:32]
-	r2Name, err := getPartName(r2Class, partType, *region, r2Bin, "00")
+	r2Name, err := getPartName(r2Class, partType, gbg.Region, gbg.Xmas, r2Bin, "00")
 	if err != nil {
 		return nil, err
 	}
@@ -305,8 +299,8 @@ func getPart(partType PartType, gbg *GeneBinGroup) (*Part, error) {
 }
 
 // getPartName finds the part name based on the parameters provided.
-func getPartName(class Class, partType PartType, region Region, partBin string, skinBin string) (string, error) {
-	partSkin, err := getPartSkin(region, skinBin)
+func getPartName(class Class, partType PartType, regionBin string, xmasBin string, partBin string, skinBin string) (string, error) {
+	partSkin, err := getPartSkin(xmasBin, regionBin, skinBin)
 	if err != nil {
 		return "", err
 	}
@@ -314,13 +308,16 @@ func getPartName(class Class, partType PartType, region Region, partBin string, 
 	if err != nil {
 		return "", err
 	}
-	if partName, ok := traitsJson[class][partType][partBin][partSkin]; ok {
+	if partName, ok := traitsJson[class][partType][partBin][string(partSkin)]; ok {
+		return partName, nil
+	}
+	if partName, ok := traitsJson[class][partType][partBin][string(GlobalSkin)]; ok {
 		return partName, nil
 	}
 	return "", errors.New(fmt.Sprintf("error finding suitable part name: %s -> %s -> %s -> %s", class, partType, partBin, partSkin))
 }
 
-// GetPartGene extracts a single part gene of a given part from the gene binary group. A Part is composed of three
+// getPartGene extracts a single part gene of a given part from the gene binary group. A Part is composed of three
 // part genes (d, r1, r2).
 func getPartGene(partType PartType, partName string) (*PartGene, error) {
 	// Set '-' as the string separator
@@ -339,22 +336,32 @@ func getPartGene(partType PartType, partName string) (*PartGene, error) {
 	return nil, errors.New(fmt.Sprintf("error finding suitable part gene for %s", partId))
 }
 
+var binPartSkinMap = map[string]PartSkin{
+	"00000":        GlobalSkin,
+	"00001":        JapanSkin,
+	"010101010101": Xmas1,
+	"10":           Xmas2,
+	"11":           Mystic,
+}
+
 // getPartSkin extracts the skin of the given part from the gene binary group. It may only return one among the four
 // values Global, Japan, Xmas, and Mystic.
-func getPartSkin(region Region, skinBin string) (string, error) {
+func getPartSkin(xmasBin string, regionBin string, skinBin string) (PartSkin, error) {
 	if len(skinBin) != 2 {
 		return "", errors.New("skin binary must be of length 2")
 	}
-	switch skinBin {
-	case "00":
-		return string(region), nil
-	case "10":
-		return "xmas", nil
-	case "11":
-		return "mystic", nil
-	default:
-		return "", errors.New("cannot recognize part skin")
+	if skin, ok := binPartSkinMap[skinBin]; ok {
+		return skin, nil
 	}
+	if skinBin == "00" {
+		if xmasBin == "010101010101" {
+			return Xmas1, nil
+		}
+		if skin, ok := binPartSkinMap[regionBin]; ok {
+			return skin, nil
+		}
+	}
+	return "", errors.New("cannot recognize part skin")
 }
 
 // getGeneQuality computes the gene quality of the Axie.

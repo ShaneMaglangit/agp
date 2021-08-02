@@ -119,3 +119,13 @@ const (
 	DefBodySkin BodySkin = ""
 	Frosty               = "frosty"
 )
+
+type PartSkin string
+
+const (
+	GlobalSkin PartSkin = "global"
+	JapanSkin           = "japan"
+	Xmas1               = "xmas1"
+	Xmas2               = "xmas2"
+	Mystic              = "mystic"
+)
