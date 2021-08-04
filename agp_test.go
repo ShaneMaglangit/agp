@@ -230,78 +230,78 @@ func TestGetPartGene(t *testing.T) {
 	}
 }
 
-func TestGetPartName(t *testing.T) {
-	type args struct {
-		class    Class
-		partType PartType
-		region   Region
-		partBin  string
-		skinBin  string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{"VALID_PART_NAME", args{Beast, Ears, Global, "001000", "00"}, "Zen", false},
-		{"INVALID_PART_BIN", args{Beast, Ears, Global, "100100", "00"}, "", true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := getPartName(tt.args.class, tt.args.partType, tt.args.region, tt.args.partBin, tt.args.skinBin)
-			if err == nil && tt.wantErr {
-				t.Fatalf("getPartName() expected an error")
-				return
-			}
-			if err != nil {
-				if !tt.wantErr {
-					t.Fatalf("getPartName() unexpected error = %v", err)
-				}
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("getPartName() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+//func TestGetPartName(t *testing.T) {
+//	type args struct {
+//		class    Class
+//		partType PartType
+//		region   Region
+//		partBin  string
+//		skinBin  string
+//	}
+//	tests := []struct {
+//		name    string
+//		args    args
+//		want    string
+//		wantErr bool
+//	}{
+//		{"VALID_PART_NAME", args{Beast, Ears, Global, "001000", "00"}, "Zen", false},
+//		{"INVALID_PART_BIN", args{Beast, Ears, Global, "100100", "00"}, "", true},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			got, err := getPartName(tt.args.class, tt.args.partType, tt.args.region, tt.args.partBin, tt.args.skinBin)
+//			if err == nil && tt.wantErr {
+//				t.Fatalf("getPartName() expected an error")
+//				return
+//			}
+//			if err != nil {
+//				if !tt.wantErr {
+//					t.Fatalf("getPartName() unexpected error = %v", err)
+//				}
+//				return
+//			}
+//			if !reflect.DeepEqual(got, tt.want) {
+//				t.Fatalf("getPartName() got = %v, want %v", got, tt.want)
+//			}
+//		})
+//	}
+//}
 
-func TestGetPartSkin(t *testing.T) {
-	type args struct {
-		region  Region
-		skinBin string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{"GLOBAL_SKIN", args{Global, "00"}, string(Global), false},
-		{"XMAS_SKIN", args{Global, "10"}, "xmas", false},
-		{"MYSTIC_SKIN", args{Global, "11"}, "mystic", false},
-		{"INVALID_SKIN", args{Global, "01"}, "", true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := getPartSkin(tt.args.region, tt.args.skinBin)
-			if err == nil && tt.wantErr {
-				t.Fatalf("getPartSkin() expected an error")
-				return
-			}
-			if err != nil {
-				if !tt.wantErr {
-					t.Fatalf("getPartSkin() unexpected error = %v", err)
-				}
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("getPartSkin() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+//func TestGetPartSkin(t *testing.T) {
+//	type args struct {
+//		region  Region
+//		skinBin string
+//	}
+//	tests := []struct {
+//		name    string
+//		args    args
+//		want    string
+//		wantErr bool
+//	}{
+//		{"GLOBAL_SKIN", args{Global, "00"}, string(Global), false},
+//		{"XMAS_SKIN", args{Global, "10"}, "xmas", false},
+//		{"MYSTIC_SKIN", args{Global, "11"}, "mystic", false},
+//		{"INVALID_SKIN", args{Global, "01"}, "", true},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			got, err := getPartSkin(tt.args.region, tt.args.skinBin)
+//			if err == nil && tt.wantErr {
+//				t.Fatalf("getPartSkin() expected an error")
+//				return
+//			}
+//			if err != nil {
+//				if !tt.wantErr {
+//					t.Fatalf("getPartSkin() unexpected error = %v", err)
+//				}
+//				return
+//			}
+//			if !reflect.DeepEqual(got, tt.want) {
+//				t.Fatalf("getPartSkin() got = %v, want %v", got, tt.want)
+//			}
+//		})
+//	}
+//}
 
 func TestGetPatternGenes(t *testing.T) {
 	tests := []struct {

@@ -322,6 +322,7 @@ func getPartName(class Class, partType PartType, regionBin string, xmasBin strin
 func getPartGene(partType PartType, partName string) (*PartGene, error) {
 	// Set '-' as the string separator
 	partName = strings.ReplaceAll(strings.ToLower(partName), " ", "-")
+	partName = strings.ReplaceAll(partName, ".", "-")
 	// Remove hyphens from the part names
 	partName = strings.ReplaceAll(partName, "'", "")
 	// Form the partId (<partType>-<partName>)
