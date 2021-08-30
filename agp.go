@@ -127,7 +127,7 @@ func Decode(gbg *GeneBinGroup) (*Genes, error) {
 		return nil, err
 	}
 
-	genes := &Genes{*class, *region, *tag, *bodySkin, *pattern, *color, *eyes, *ears, *horn, *mouth, *back, *tail, 0}
+	genes := &Genes{*class, *region, *tag, *bodySkin, *pattern, *color, *eyes, *mouth, *ears, *horn, *back, *tail, 0}
 	genes.GeneQuality = getGeneQuality(*genes)
 	return genes, nil
 }
