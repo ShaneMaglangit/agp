@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math"
+	"regexp"
 	"strings"
 )
 
@@ -48,13 +49,27 @@ func ParseHex(hex string) (GeneBinGroup, error) {
 	return gbg, nil
 }
 
+func hexToBin(hex string) (string, error) {
+	p := regexp.MustCompile("^0+")
+	str := p.ReplaceAllString(hex, "")
+	bInt, err := hexutil.DecodeBig("0x" + str)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%0*s", 256, bInt.Text(2)), nil
+}
+
 func ParseHex512(hex string) (GeneBinGroup, error) {
 	var gbg GeneBinGroup
-	bInt, err := hexutil.DecodeBig(hex)
+	bStrL, err := hexToBin(hex[2:][:len(hex[2:])-64])
 	if err != nil {
 		return gbg, err
 	}
-	bStr := fmt.Sprintf("%0*s", 512, bInt.Text(2))
+	bStrR, err := hexToBin(hex[2:][len(hex[2:])-64:])
+	if err != nil {
+		return gbg, err
+	}
+	bStr := bStrL + bStrR
 	gbg.Class = bStr[0:5]
 	gbg.Region = bStr[22:40]
 	gbg.Tag = bStr[40:55]
@@ -359,7 +374,7 @@ func getPart(gbg *GeneBinGroup, partBin string, partType PartType) (Part, error)
 
 func getPart512(gbg *GeneBinGroup, partBin string, partType PartType) (Part, error) {
 	var part Part
-	dClass := binClassMap[partBin[5:9]]
+	dClass := binClassMap[partBin[4:9]]
 	dBin := partBin[11:17]
 	dSkin, err := getPartSkin(gbg, partBin[0:4])
 	if err != nil {
@@ -374,7 +389,7 @@ func getPart512(gbg *GeneBinGroup, partBin string, partType PartType) (Part, err
 		return part, err
 	}
 
-	r1Class := binClassMap[partBin[18:22]]
+	r1Class := binClassMap[partBin[17:22]]
 	r1Bin := partBin[24:30]
 	r1Name, err := getPartName(r1Class, partType, gbg.Region, r1Bin, dSkin)
 	if err != nil {
@@ -385,8 +400,8 @@ func getPart512(gbg *GeneBinGroup, partBin string, partType PartType) (Part, err
 		return part, err
 	}
 
-	r2Class := binClassMap[partBin[31:35]]
-	r2Bin := partBin[37:48]
+	r2Class := binClassMap[partBin[30:35]]
+	r2Bin := partBin[37:43]
 	r2Name, err := getPartName(r2Class, partType, gbg.Region, r2Bin, dSkin)
 	if err != nil {
 		return part, err
