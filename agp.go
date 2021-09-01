@@ -17,6 +17,14 @@ func ParseHexDecode(hex string) (Genes, error) {
 	return Decode(&gbg)
 }
 
+func ParseHexDecode512(hex string) (Genes, error) {
+	gbg, err := ParseHex512(hex)
+	if err != nil {
+		return Genes{}, err
+	}
+	return Decode512(&gbg)
+}
+
 func ParseHex(hex string) (GeneBinGroup, error) {
 	var gbg GeneBinGroup
 	bInt, err := hexutil.DecodeBig(hex)
