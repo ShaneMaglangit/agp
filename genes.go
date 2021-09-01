@@ -3,7 +3,6 @@ package agp
 // GeneBinGroup collectively stores each part of the parsed binary representation of the genes.
 type GeneBinGroup struct {
 	Class    string
-	Reserved string
 	Region   string
 	Tag      string
 	BodySkin string

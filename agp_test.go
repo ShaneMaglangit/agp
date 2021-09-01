@@ -8,7 +8,7 @@ import (
 
 func TestDecode(t *testing.T) {
 	hex := "0x11c642400a028ca14a428c20cc011080c61180a0820180604233082"
-	want := &Genes{
+	want := Genes{
 		Class:    Beast,
 		Region:   Global,
 		Tag:      NoTag,
@@ -45,13 +45,14 @@ func TestDecode(t *testing.T) {
 			R1: PartGene{"tail-hot-butt", Plant, "", Tail, "Hot Butt"},
 			R2: PartGene{"tail-swallow", Bird, "", Tail, "Swallow"},
 		},
+		GeneQuality: 23.67,
 	}
 	bin, err := ParseHex(hex)
 	if err != nil {
 		t.Fatalf("Decode() error occured while parsing hex = %v", err)
 		return
 	}
-	got, err := Decode(bin)
+	got, err := Decode(&bin)
 	if err != nil {
 		t.Fatalf("Decode() unexpected error = %v", err)
 		return
@@ -84,8 +85,8 @@ func TestGetBodySkin(t *testing.T) {
 				}
 				return
 			}
-			if !reflect.DeepEqual(*got, tt.want) {
-				t.Fatalf("getBodySkin() got = %v, want %v", *got, tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("getBodySkin() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -114,8 +115,8 @@ func TestGetClass(t *testing.T) {
 				}
 				return
 			}
-			if !reflect.DeepEqual(*got, tt.want) {
-				t.Fatalf("getClass() got = %v, want %v", *got, tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("getClass() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -123,28 +124,17 @@ func TestGetClass(t *testing.T) {
 
 func TestGetColorGenes(t *testing.T) {
 	tests := []struct {
-		name    string
-		bin     *GeneBinGroup
-		want    *ColorGene
-		wantErr bool
+		name string
+		bin  *GeneBinGroup
+		want ColorGene
 	}{
-		{"VALID_COLOR", &GeneBinGroup{Class: "0000", Color: "001000110010"}, &ColorGene{"ffec51", "ffa12a", "ffec51"}, false},
-		{"INVALID_CLASS", &GeneBinGroup{Class: "1111", Color: "001000110010"}, nil, true},
-		{"INVALID_COLORS", &GeneBinGroup{Class: "0000", Color: "1011010101010"}, nil, true},
+		{"VALID_COLOR", &GeneBinGroup{Class: "0000", Color: "001000110010"}, ColorGene{"ffec51", "ffa12a", "ffec51"}},
+		{"INVALID_CLASS", &GeneBinGroup{Class: "0010", Color: "001100110011"}, ColorGene{"ffb4bb", "ffb4bb", "ffb4bb"}},
+		{"INVALID_COLORS", &GeneBinGroup{Class: "0100", Color: "001000110010"}, ColorGene{"4cffdf", "2de8f2", "4cffdf"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getColorGenes(tt.bin)
-			if err == nil && tt.wantErr {
-				t.Fatalf("getColorGenes() expected an error")
-				return
-			}
-			if err != nil {
-				if !tt.wantErr {
-					t.Fatalf("getColorGenes() unexpected error = %v", err)
-				}
-				return
-			}
+			got, _ := getColorGenes(tt.bin)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Fatalf("getColorGenes() got = %v, want %v", got, tt.want)
 			}
@@ -160,24 +150,24 @@ func TestGetPart(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *Part
+		want    Part
 		wantErr bool
 	}{
 		{
 			"VALID_PART",
-			args{Eyes, &GeneBinGroup{Region: "00000", Eyes: "00000000101000000010100011001010"}}, &Part{PartGene{"eyes-chubby", Beast, "", Eyes, "Chubby"}, PartGene{"eyes-chubby", Beast, "", Eyes, "Chubby"}, PartGene{"eyes-blossom", Plant, "", Eyes, "Blossom"}, false},
+			args{Eyes, &GeneBinGroup{Region: "00000", Eyes: "00000000101000000010100011001010"}}, Part{PartGene{"eyes-chubby", Beast, "", Eyes, "Chubby"}, PartGene{"eyes-chubby", Beast, "", Eyes, "Chubby"}, PartGene{"eyes-blossom", Plant, "", Eyes, "Blossom"}, false},
 			false,
 		},
 		{
 			"INVALID_PART",
 			args{Eyes, &GeneBinGroup{Region: "00000", Eyes: "00101000101000000101100011001010"}},
-			nil,
+			Part{},
 			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getPart(tt.args.partType, tt.args.gbg)
+			got, err := getPart(tt.args.gbg, tt.args.gbg.Eyes, Eyes)
 			if err == nil && tt.wantErr {
 				t.Fatalf("getPart() expected an error")
 				return
@@ -203,12 +193,12 @@ func TestGetPartGene(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *PartGene
+		want    PartGene
 		wantErr bool
 	}{
-		{"VALID_PART_GENE", args{Ears, "Nut Cracker"}, &PartGene{"ears-nut-cracker", Beast, "", Ears, "Nut Cracker"}, false},
-		{"INVALID_COMBINATION", args{Ears, "Chubby"}, nil, true},
-		{"INVALID_PART_NAME", args{Ears, "Ballon Mouth"}, nil, true},
+		{"VALID_PART_GENE", args{Ears, "Nut Cracker"}, PartGene{"ears-nut-cracker", Beast, "", Ears, "Nut Cracker"}, false},
+		{"INVALID_COMBINATION", args{Ears, "Chubby"}, PartGene{}, true},
+		{"INVALID_PART_NAME", args{Ears, "Ballon Mouth"}, PartGene{}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -230,102 +220,91 @@ func TestGetPartGene(t *testing.T) {
 	}
 }
 
-//func TestGetPartName(t *testing.T) {
-//	type args struct {
-//		class    Class
-//		partType PartType
-//		region   Region
-//		partBin  string
-//		skinBin  string
-//	}
-//	tests := []struct {
-//		name    string
-//		args    args
-//		want    string
-//		wantErr bool
-//	}{
-//		{"VALID_PART_NAME", args{Beast, Ears, Global, "001000", "00"}, "Zen", false},
-//		{"INVALID_PART_BIN", args{Beast, Ears, Global, "100100", "00"}, "", true},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			got, err := getPartName(tt.args.class, tt.args.partType, tt.args.region, tt.args.partBin, tt.args.skinBin)
-//			if err == nil && tt.wantErr {
-//				t.Fatalf("getPartName() expected an error")
-//				return
-//			}
-//			if err != nil {
-//				if !tt.wantErr {
-//					t.Fatalf("getPartName() unexpected error = %v", err)
-//				}
-//				return
-//			}
-//			if !reflect.DeepEqual(got, tt.want) {
-//				t.Fatalf("getPartName() got = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
-
-//func TestGetPartSkin(t *testing.T) {
-//	type args struct {
-//		region  Region
-//		skinBin string
-//	}
-//	tests := []struct {
-//		name    string
-//		args    args
-//		want    string
-//		wantErr bool
-//	}{
-//		{"GLOBAL_SKIN", args{Global, "00"}, string(Global), false},
-//		{"XMAS_SKIN", args{Global, "10"}, "xmas", false},
-//		{"MYSTIC_SKIN", args{Global, "11"}, "mystic", false},
-//		{"INVALID_SKIN", args{Global, "01"}, "", true},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			got, err := getPartSkin(tt.args.region, tt.args.skinBin)
-//			if err == nil && tt.wantErr {
-//				t.Fatalf("getPartSkin() expected an error")
-//				return
-//			}
-//			if err != nil {
-//				if !tt.wantErr {
-//					t.Fatalf("getPartSkin() unexpected error = %v", err)
-//				}
-//				return
-//			}
-//			if !reflect.DeepEqual(got, tt.want) {
-//				t.Fatalf("getPartSkin() got = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
-
-func TestGetPatternGenes(t *testing.T) {
+func TestGetPartName(t *testing.T) {
+	type args struct {
+		class     Class
+		partType  PartType
+		regionBin string
+		partBin   string
+		partSkin  PartSkin
+	}
 	tests := []struct {
 		name    string
-		bin     *GeneBinGroup
-		want    *PatternGene
+		args    args
+		want    string
 		wantErr bool
 	}{
-		{"VALID_PATTERN", &GeneBinGroup{Pattern: "000001000111000110"}, &PatternGene{"000001", "000111", "000110"}, false},
-		{"INVALID_BINARY", &GeneBinGroup{Region: "01010101010"}, nil, true},
+		{"VALID_PART_NAME", args{Beast, Ears, "00000", "001000", GlobalSkin}, "Zen", false},
+		{"INVALID_PART_BIN", args{Beast, Ears, "00000", "100100", GlobalSkin}, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getPatternGenes(tt.bin)
+			got, err := getPartName(tt.args.class, tt.args.partType, tt.args.regionBin, tt.args.partBin, tt.args.partSkin)
 			if err == nil && tt.wantErr {
-				t.Fatalf("getPatternGenes() expected an error")
+				t.Fatalf("getPartName() expected an error")
 				return
 			}
 			if err != nil {
 				if !tt.wantErr {
-					t.Fatalf("getPatternGenes() unexpected error = %v", err)
+					t.Fatalf("getPartName() unexpected error = %v", err)
 				}
 				return
 			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("getPartName() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetPartSkin(t *testing.T) {
+	type args struct {
+		regionBin string
+		skinBin   string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    PartSkin
+		wantErr bool
+	}{
+		{"GLOBAL_SKIN", args{"00000", "00"}, GlobalSkin, false},
+		{"XMAS_SKIN", args{"00000", "10"}, Xmas2, false},
+		{"MYSTIC_SKIN", args{"00000", "11"}, Mystic, false},
+		{"INVALID_SKIN", args{"00000", "01"}, "", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getPartSkin(&GeneBinGroup{Region: tt.args.regionBin}, tt.args.skinBin)
+			if err == nil && tt.wantErr {
+				t.Fatalf("getPartSkin() expected an error")
+				return
+			}
+			if err != nil {
+				if !tt.wantErr {
+					t.Fatalf("getPartSkin() unexpected error = %v", err)
+				}
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("getPartSkin() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetPatternGenes(t *testing.T) {
+	tests := []struct {
+		name string
+		bin  *GeneBinGroup
+		want PatternGene
+	}{
+		{"VALID_PATTERN", &GeneBinGroup{Pattern: "000001000111000110"}, PatternGene{"000001", "000111", "000110"}},
+		{"INVALID_BINARY", &GeneBinGroup{Region: "01010101010"}, PatternGene{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, _ := getPatternGenes(tt.bin)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Fatalf("getPatternGenes() got = %v, want %v", got, tt.want)
 			}
@@ -335,30 +314,18 @@ func TestGetPatternGenes(t *testing.T) {
 
 func TestGetRegion(t *testing.T) {
 	tests := []struct {
-		name    string
-		bin     *GeneBinGroup
-		want    Region
-		wantErr bool
+		name string
+		bin  *GeneBinGroup
+		want Region
 	}{
-		{"VALID_REGION", &GeneBinGroup{Region: "00000"}, Global, false},
-		{"INVALID_BINARY", &GeneBinGroup{Region: "000000"}, "", true},
-		{"INVALID_REGION", &GeneBinGroup{Region: "11111"}, "", true},
+		{"VALID_REGION", &GeneBinGroup{Region: "00000", Eyes: "0000", Ears: "0000", Horn: "0000", Mouth: "0000", Back: "0000", Tail: "0000"}, Global},
+		{"INVALID_REGION", &GeneBinGroup{Region: "000000000000000000", Eyes: "0000", Ears: "0011", Horn: "0000", Mouth: "0000", Back: "0000", Tail: "0000"}, Japan},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getRegion(tt.bin)
-			if err == nil && tt.wantErr {
-				t.Fatalf("getRegion() expected an error")
-				return
-			}
-			if err != nil {
-				if !tt.wantErr {
-					t.Fatalf("getRegion() unexpected error = %v", err)
-				}
-				return
-			}
-			if !reflect.DeepEqual(*got, tt.want) {
-				t.Fatalf("getRegion() got = %v, want %v", *got, tt.want)
+			got, _ := getRegion(tt.bin)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("getRegion() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -388,8 +355,8 @@ func TestGetTag(t *testing.T) {
 				}
 				return
 			}
-			if !reflect.DeepEqual(*got, tt.want) {
-				t.Fatalf("getTag() got = %v, want %v", *got, tt.want)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("getTag() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -435,7 +402,7 @@ func TestParseHex(t *testing.T) {
 				return
 			}
 			tt.want = fmt.Sprintf("%0*s", 256, tt.want)
-			got := fmt.Sprintf("%s%s%s%s%s%s%s%s%s%s%s%s%s%s", gbg.Class, gbg.Reserved, gbg.Region, gbg.Tag, gbg.BodySkin, gbg.Xmas, gbg.Pattern, gbg.Color, gbg.Eyes, gbg.Mouth, gbg.Ears, gbg.Horn, gbg.Back, gbg.Tail)
+			got := fmt.Sprintf("%s0000%s%s%s%s%s%s%s%s%s%s%s%s", gbg.Class, gbg.Region, gbg.Tag, gbg.BodySkin, gbg.Xmas, gbg.Pattern, gbg.Color, gbg.Eyes, gbg.Mouth, gbg.Ears, gbg.Horn, gbg.Back, gbg.Tail)
 			if !reflect.DeepEqual(got, tt.want) {
 				for i := 0; i < 256; i++ {
 					if got[i] != tt.want[i] {
@@ -461,7 +428,7 @@ func TestGetGeneQuality(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			genes, _ := ParseHexDecode(tt.hex)
-			if got := getGeneQuality(*genes); got != tt.want {
+			if got := getGeneQuality(genes); got != tt.want {
 				t.Fatalf("getGeneQuality() = %v, want %v", got, tt.want)
 			}
 		})

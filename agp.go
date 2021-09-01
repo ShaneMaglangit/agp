@@ -1,9 +1,6 @@
-// Package agp is a gene parsing package for Axie Infinity
 package agp
 
 import (
-	_ "embed"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -11,199 +8,274 @@ import (
 	"strings"
 )
 
-//go:embed traits.json
-var traitsJson []byte
-
-// traitsJSON holds the content of the traits.json file.
-type traitsJSON map[Class]map[PartType]map[string]map[string]string
-
-// getTraitsJSON unmarshalls the content of the traits.json file into a traitsJSON object.
-func getTraitsJSON() (traitsJSON, error) {
-	var ret traitsJSON
-	err := json.Unmarshal(traitsJson, &ret)
-	return ret, err
-}
-
-//go:embed parts.json
-var partsJson []byte
-
-// partsJSON holds the content of the parts.json file.
-type partsJSON map[string]PartGene
-
-// getPartsJSON unmarshalls the contents of the parts.json file into a partsJSON object.
-func getPartsJSON() (partsJSON, error) {
-	var ret partsJSON
-	err := json.Unmarshal(partsJson, &ret)
-	return ret, err
-}
-
 // ParseHexDecode parses a given hex into a Gene object. This combines ParseHex and Decode into a single function.
-func ParseHexDecode(hex string) (*Genes, error) {
+func ParseHexDecode(hex string) (Genes, error) {
 	gbg, err := ParseHex(hex)
 	if err != nil {
-		return nil, err
+		return Genes{}, err
 	}
-	return Decode(gbg)
+	return Decode(&gbg)
 }
 
-// ParseHex converts a given hex into its binary representation and parse them into a GeneBinGroup object.
-func ParseHex(hex string) (*GeneBinGroup, error) {
-	// Convert the given hex into binary
+func ParseHex(hex string) (GeneBinGroup, error) {
+	var gbg GeneBinGroup
 	bInt, err := hexutil.DecodeBig(hex)
 	if err != nil {
-		return nil, err
+		return gbg, err
 	}
-	// Fill the parsed binary to form a 256 bit string
 	bStr := fmt.Sprintf("%0*s", 256, bInt.Text(2))
-	// Create the GeneBinGroup object with the parsed binary string.
-	return &GeneBinGroup{
-		Class:    bStr[0:4],
-		Region:   bStr[8:13],
-		Tag:      bStr[13:18],
-		BodySkin: bStr[18:22],
-		Xmas:     bStr[22:34],
-		Pattern:  bStr[34:52],
-		Color:    bStr[52:64],
-		Eyes:     bStr[64:96],
-		Mouth:    bStr[96:128],
-		Ears:     bStr[128:160],
-		Horn:     bStr[160:192],
-		Back:     bStr[192:224],
-		Tail:     bStr[224:256],
-	}, nil
+	gbg.Class = bStr[0:4]
+	gbg.Region = bStr[8:13]
+	gbg.Tag = bStr[13:18]
+	gbg.BodySkin = bStr[18:22]
+	gbg.Xmas = bStr[22:34]
+	gbg.Pattern = bStr[34:52]
+	gbg.Color = bStr[52:64]
+	gbg.Eyes = bStr[64:96]
+	gbg.Mouth = bStr[96:128]
+	gbg.Ears = bStr[128:160]
+	gbg.Horn = bStr[160:192]
+	gbg.Back = bStr[192:224]
+	gbg.Tail = bStr[224:256]
+	return gbg, nil
 }
 
-// Decode parses each part of the gene binary group into its respective data to form a Gene object.
-//
-// If any error arises while the genes data are being decoded. The function will return a nil value along with
-// the corresponding error message.
-func Decode(gbg *GeneBinGroup) (*Genes, error) {
+func ParseHex512(hex string) (GeneBinGroup, error) {
+	var gbg GeneBinGroup
+	bInt, err := hexutil.DecodeBig(hex)
+	if err != nil {
+		return gbg, err
+	}
+	bStr := fmt.Sprintf("%0*s", 512, bInt.Text(2))
+	gbg.Class = bStr[0:5]
+	gbg.Region = bStr[22:40]
+	gbg.Tag = bStr[40:55]
+	gbg.BodySkin = bStr[61:65]
+	gbg.Pattern = bStr[65:92]
+	gbg.Color = bStr[92:110]
+	gbg.Eyes = bStr[149:192]
+	gbg.Mouth = bStr[213:256]
+	gbg.Ears = bStr[277:320]
+	gbg.Horn = bStr[341:384]
+	gbg.Back = bStr[405:448]
+	gbg.Tail = bStr[469:512]
+	return gbg, nil
+}
+
+func Decode(gbg *GeneBinGroup) (Genes, error) {
+	var genes Genes
 	class, err := getClass(gbg)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
+	genes.Class = class
 	region, err := getRegion(gbg)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
+	genes.Region = region
 	tag, err := getTag(gbg)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
+	genes.Tag = tag
 	bodySkin, err := getBodySkin(gbg)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
+	genes.BodySkin = bodySkin
 	pattern, err := getPatternGenes(gbg)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
+	genes.Pattern = pattern
 	color, err := getColorGenes(gbg)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
-	eyes, err := getPart(Eyes, gbg)
+	genes.Color = color
+	eyes, err := getPart(gbg, gbg.Eyes, Eyes)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
-	ears, err := getPart(Ears, gbg)
+	genes.Eyes = eyes
+	ears, err := getPart(gbg, gbg.Ears, Ears)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
-	horn, err := getPart(Horn, gbg)
+	genes.Ears = ears
+	horn, err := getPart(gbg, gbg.Horn, Horn)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
-	mouth, err := getPart(Mouth, gbg)
+	genes.Horn = horn
+	mouth, err := getPart(gbg, gbg.Mouth, Mouth)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
-	back, err := getPart(Back, gbg)
+	genes.Mouth = mouth
+	back, err := getPart(gbg, gbg.Back, Back)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
-	tail, err := getPart(Tail, gbg)
+	genes.Back = back
+	tail, err := getPart(gbg, gbg.Tail, Tail)
 	if err != nil {
-		return nil, err
+		return genes, err
 	}
+	genes.Tail = tail
+	genes.GeneQuality = getGeneQuality(genes)
+	return genes, nil
+}
 
-	genes := &Genes{*class, *region, *tag, *bodySkin, *pattern, *color, *eyes, *mouth, *ears, *horn, *back, *tail, 0}
-	genes.GeneQuality = getGeneQuality(*genes)
+func Decode512(gbg *GeneBinGroup) (Genes, error) {
+	var genes Genes
+	class, err := getClass(gbg)
+	if err != nil {
+		return genes, err
+	}
+	genes.Class = class
+	region, err := getRegion(gbg)
+	if err != nil {
+		return genes, err
+	}
+	genes.Region = region
+	tag, err := getTag(gbg)
+	if err != nil {
+		return genes, err
+	}
+	genes.Tag = tag
+	bodySkin, err := getBodySkin(gbg)
+	if err != nil {
+		return genes, err
+	}
+	genes.BodySkin = bodySkin
+	pattern, err := getPatternGenes(gbg)
+	if err != nil {
+		return genes, err
+	}
+	genes.Pattern = pattern
+	color, err := getColorGenes(gbg)
+	if err != nil {
+		return genes, err
+	}
+	genes.Color = color
+	eyes, err := getPart512(gbg, gbg.Eyes, Eyes)
+	if err != nil {
+		return genes, err
+	}
+	genes.Eyes = eyes
+	ears, err := getPart512(gbg, gbg.Ears, Ears)
+	if err != nil {
+		return genes, err
+	}
+	genes.Ears = ears
+	horn, err := getPart512(gbg, gbg.Horn, Horn)
+	if err != nil {
+		return genes, err
+	}
+	genes.Horn = horn
+	mouth, err := getPart512(gbg, gbg.Mouth, Mouth)
+	if err != nil {
+		return genes, err
+	}
+	genes.Mouth = mouth
+	back, err := getPart512(gbg, gbg.Back, Back)
+	if err != nil {
+		return genes, err
+	}
+	genes.Back = back
+	tail, err := getPart512(gbg, gbg.Tail, Tail)
+	if err != nil {
+		return genes, err
+	}
+	genes.Tail = tail
+	genes.GeneQuality = getGeneQuality(genes)
 	return genes, nil
 }
 
 var binClassMap = map[string]Class{
-	"0000": Beast,
-	"0001": Bug,
-	"0010": Bird,
-	"0011": Plant,
-	"0100": Aquatic,
-	"0101": Reptile,
-	"1000": Mech,
-	"1010": Dusk,
-	"1001": Dawn,
+	"0000":  Beast,
+	"0001":  Bug,
+	"0010":  Bird,
+	"0011":  Plant,
+	"0100":  Aquatic,
+	"0101":  Reptile,
+	"1000":  Mech,
+	"1010":  Dusk,
+	"1001":  Dawn,
+	"00000": Beast,
+	"00001": Bug,
+	"00010": Bird,
+	"00011": Plant,
+	"00100": Aquatic,
+	"00101": Reptile,
+	"10000": Mech,
+	"10001": Dusk,
+	"10010": Dawn,
 }
 
-// getClass extracts the gene class from the gene binary group.
-// It will return a class among the 9 available Axie classes: Beast, Bug, Bird, Plant,
-// Aquatic, Reptile, Mech, Dusk, and Dawn.
-func getClass(gbg *GeneBinGroup) (*Class, error) {
-	if len(gbg.Class) != 4 {
-		return nil, errors.New("pattern binary must be of length 4")
-	}
+func getClass(gbg *GeneBinGroup) (Class, error) {
 	if ret, ok := binClassMap[gbg.Class]; ok {
-		return &ret, nil
+		return ret, nil
 	}
-	return nil, errors.New("cannot recognize class")
+	return "", errors.New(fmt.Sprint("cannot recognize class:", gbg.Class))
 }
 
 var binRegionMap = map[string]Region{"00000": Global, "00001": Japan}
 
-// GetRegion extracts the region from the gene binary group. It will either return Global or Japan.
-func getRegion(gbg *GeneBinGroup) (*Region, error) {
-	if len(gbg.Region) != 5 {
-		return nil, errors.New("region binary must be of length 5")
-	}
+func getRegion(gbg *GeneBinGroup) (Region, error) {
 	if ret, ok := binRegionMap[gbg.Region]; ok {
-		return &ret, nil
+		return ret, nil
 	}
-	return nil, errors.New("cannot recognize region")
+	if len(gbg.Region) <= 4 {
+		return "", errors.New(fmt.Sprint("cannot recognize region:", gbg.Region))
+	}
+	if gbg.Eyes[0:4] == "0011" {
+		return Japan, nil
+	}
+	if gbg.Ears[0:4] == "0011" {
+		return Japan, nil
+	}
+	if gbg.Horn[0:4] == "0011" {
+		return Japan, nil
+	}
+	if gbg.Mouth[0:4] == "0011" {
+		return Japan, nil
+	}
+	if gbg.Back[0:4] == "0011" {
+		return Japan, nil
+	}
+	if gbg.Tail[0:4] == "0011" {
+		return Japan, nil
+	}
+	return Global, nil
 }
 
-var binTagMap = map[string]Tag{"00000": NoTag, "00001": Origin, "00011": Meo1, "00100": Meo2}
+var binTagMap = map[string]Tag{
+	"00000": NoTag, "00001": Origin, "00011": Meo1, "00100": Meo2,
+	"000000000000000": NoTag, "000000000000001": Origin, "000000000000010": Meo1, "000000000000011": Meo2,
+}
 
-// getTag extracts the tag from the gene binary group. It will return one among the values: Origin, Meo1, Meo2,
-// an empty string (default).
-func getTag(gbg *GeneBinGroup) (*Tag, error) {
-	if len(gbg.Tag) != 5 {
-		return nil, errors.New("tag binary must be of length 5")
-	}
+func getTag(gbg *GeneBinGroup) (Tag, error) {
 	if ret, ok := binTagMap[gbg.Tag]; ok {
-		return &ret, nil
+		return ret, nil
 	}
-	return nil, errors.New("cannot recognize tag")
+	return NoTag, errors.New(fmt.Sprint("cannot recognize tag:", gbg.Tag))
 }
 
 var binBodySkinMap = map[string]BodySkin{"0000": DefBodySkin, "0001": Frosty}
 
-// getBodySkin extracts the body skin from the gene binary group. It will either an Frost or an empty string (default).
-func getBodySkin(gbg *GeneBinGroup) (*BodySkin, error) {
-	if len(gbg.BodySkin) != 4 {
-		return nil, errors.New("body skin binary must be of length 4")
-	}
+func getBodySkin(gbg *GeneBinGroup) (BodySkin, error) {
 	if ret, ok := binBodySkinMap[gbg.BodySkin]; ok {
-		return &ret, nil
+		return ret, nil
 	}
-	return nil, errors.New("cannot recognize body skin")
+	return DefBodySkin, errors.New(fmt.Sprint("cannot recognize body skin", gbg.Tag))
 }
 
-// getPatternGenes extracts the pattern genes from the gene binary group. It will return one dominant and two recessive
-// pattern genes of the Axie.
-func getPatternGenes(gbg *GeneBinGroup) (*PatternGene, error) {
-	if len(gbg.Pattern) != 18 {
-		return nil, errors.New("pattern binary must be of length 18")
-	}
-	return &PatternGene{gbg.Pattern[0:6], gbg.Pattern[6:12], gbg.Pattern[12:18]}, nil
+func getPatternGenes(gbg *GeneBinGroup) (PatternGene, error) {
+	bSize := len(gbg.Pattern) / 3
+	return PatternGene{gbg.Pattern[0:bSize], gbg.Pattern[bSize : bSize*2], gbg.Pattern[bSize*2 : bSize*3]}, nil
 }
 
 var classColorMap = map[Class]map[string]string{
@@ -218,123 +290,139 @@ var classColorMap = map[Class]map[string]string{
 	Dawn:    {"0010": "D9D9D9", "0011": "D9D9D9", "0100": "D9D9D9", "0110": "D9D9D9", "0000": "ffffff"},
 }
 
-// getColorGenes extracts the color genes from the gene binary group. It will return one dominant and two recessive
-// color genes of the Axie.
-func getColorGenes(gbg *GeneBinGroup) (*ColorGene, error) {
-	if len(gbg.Color) != 12 {
-		return nil, errors.New("color binary must be of length 12")
-	}
+func getColorGenes(gbg *GeneBinGroup) (ColorGene, error) {
+	bSize := len(gbg.Color) / 3
 	class, err := getClass(gbg)
 	if err != nil {
-		return nil, err
+		return ColorGene{}, err
 	}
-	return &ColorGene{classColorMap[*class][gbg.Color[0:4]], classColorMap[*class][gbg.Color[4:8]], classColorMap[*class][gbg.Color[8:12]]}, nil
+	d := gbg.Color[0:bSize]
+	r1 := gbg.Color[bSize : bSize*2]
+	r2 := gbg.Color[bSize*2 : bSize*3]
+	return ColorGene{
+		classColorMap[class][d[len(d)-4:]],
+		classColorMap[class][r1[len(r1)-4:]],
+		classColorMap[class][r2[len(r2)-4:]],
+	}, nil
 }
 
-// getPart extracts the part genes from the gene binary group. It accepts an additional parameter "partType"
-// which describes which part would the function look for. It will return one dominant and two recessive genes of
-// the given part.
-func getPart(partType PartType, gbg *GeneBinGroup) (*Part, error) {
-	// Get the binary representation of the selected part
-	var partBin string
-	switch partType {
-	case Eyes:
-		partBin = gbg.Eyes
-	case Ears:
-		partBin = gbg.Ears
-	case Horn:
-		partBin = gbg.Horn
-	case Mouth:
-		partBin = gbg.Mouth
-	case Back:
-		partBin = gbg.Back
-	default:
-		partBin = gbg.Tail
-	}
-
-	// Check if the binary for this part is 32 bit. Otherwise, throw an error.
-	if len(partBin) != 32 {
-		return nil, errors.New(fmt.Sprintf("%s binary must be of length 32", partType))
-	}
-
-	skinBin := partBin[0:2]
-
-	// Get the dominant genes
+func getPart(gbg *GeneBinGroup, partBin string, partType PartType) (Part, error) {
+	var part Part
 	dClass := binClassMap[partBin[2:6]]
 	dBin := partBin[6:12]
-	dName, err := getPartName(dClass, partType, gbg.Region, gbg.Xmas, dBin, skinBin)
+	dSkin, err := getPartSkin(gbg, partBin[0:2])
 	if err != nil {
-		return nil, err
+		return part, err
 	}
-	d, err := getPartGene(partType, dName)
+	dName, err := getPartName(dClass, partType, gbg.Region, dBin, dSkin)
 	if err != nil {
-		return nil, err
+		return part, err
+	}
+	part.D, err = getPartGene(partType, dName)
+	if err != nil {
+		return part, err
 	}
 
-	// Get the recessive 1 genes
 	r1Class := binClassMap[partBin[12:16]]
 	r1Bin := partBin[16:22]
-	r1Name, err := getPartName(r1Class, partType, gbg.Region, gbg.Xmas, r1Bin, "00")
+	r1Name, err := getPartName(r1Class, partType, gbg.Region, r1Bin, "00")
 	if err != nil {
-		return nil, err
+		return part, err
 	}
-	r1, err := getPartGene(partType, r1Name)
+	part.R1, err = getPartGene(partType, r1Name)
 	if err != nil {
-		return nil, err
+		return part, err
 	}
 
-	// Get the recessive 2 genes
 	r2Class := binClassMap[partBin[22:26]]
 	r2Bin := partBin[26:32]
-	r2Name, err := getPartName(r2Class, partType, gbg.Region, gbg.Xmas, r2Bin, "00")
+	r2Name, err := getPartName(r2Class, partType, gbg.Region, r2Bin, "00")
 	if err != nil {
-		return nil, err
+		return part, err
 	}
-	r2, err := getPartGene(partType, r2Name)
+	part.R2, err = getPartGene(partType, r2Name)
 	if err != nil {
-		return nil, err
+		return part, err
 	}
 
-	return &Part{*d, *r1, *r2, skinBin == "11"}, nil
+	part.Mystic = dSkin == Mystic || partBin[0:2] == "0001"
+	return part, nil
 }
 
-// getPartName finds the part name based on the parameters provided.
-func getPartName(class Class, partType PartType, regionBin string, xmasBin string, partBin string, skinBin string) (string, error) {
-	partSkin, err := getPartSkin(xmasBin, regionBin, skinBin)
+func getPart512(gbg *GeneBinGroup, partBin string, partType PartType) (Part, error) {
+	var part Part
+	dClass := binClassMap[partBin[5:9]]
+	dBin := partBin[11:17]
+	dSkin, err := getPartSkin(gbg, partBin[0:4])
 	if err != nil {
-		return "", err
+		return part, err
 	}
+	dName, err := getPartName(dClass, partType, gbg.Region, dBin, dSkin)
+	if err != nil {
+		return part, err
+	}
+	part.D, err = getPartGene(partType, dName)
+	if err != nil {
+		return part, err
+	}
+
+	r1Class := binClassMap[partBin[18:22]]
+	r1Bin := partBin[24:30]
+	r1Name, err := getPartName(r1Class, partType, gbg.Region, r1Bin, dSkin)
+	if err != nil {
+		return part, err
+	}
+	part.R1, err = getPartGene(partType, r1Name)
+	if err != nil {
+		return part, err
+	}
+
+	r2Class := binClassMap[partBin[31:35]]
+	r2Bin := partBin[37:48]
+	r2Name, err := getPartName(r2Class, partType, gbg.Region, r2Bin, dSkin)
+	if err != nil {
+		return part, err
+	}
+	part.R2, err = getPartGene(partType, r2Name)
+	if err != nil {
+		return part, err
+	}
+
+	part.Mystic = dSkin == Mystic || partBin[0:4] == "0001"
+	return part, nil
+}
+
+func getPartName(class Class, partType PartType, regionBin string, partBin string, skin PartSkin) (string, error) {
 	traitsJson, err := getTraitsJSON()
 	if err != nil {
 		return "", err
 	}
-	if partName, ok := traitsJson[class][partType][partBin][string(partSkin)]; ok {
+	part, ok := traitsJson[class][partType][partBin]
+	if !ok {
+		return "", errors.New(fmt.Sprint("cannot recognize part name:", partType, regionBin, partBin))
+	}
+	if partName := part[string(skin)]; partName != "" {
 		return partName, nil
 	}
-	if partName, ok := traitsJson[class][partType][partBin][string(GlobalSkin)]; ok {
+	if partName := part[string(Global)]; partName != "" {
 		return partName, nil
 	}
-	return "", errors.New(fmt.Sprintf("error finding suitable part name: %s -> %s -> %s -> %s", class, partType, partBin, partSkin))
+	return "", errors.New(fmt.Sprint("cannot recognize part name:", partType, regionBin, partBin))
 }
 
-// getPartGene extracts a single part gene of a given part from the gene binary group. A Part is composed of three
-// part genes (d, r1, r2).
-func getPartGene(partType PartType, partName string) (*PartGene, error) {
-	// Set '-' as the string separator
+func getPartGene(partType PartType, partName string) (PartGene, error) {
 	partName = strings.ReplaceAll(strings.ToLower(partName), " ", "-")
 	partName = strings.ReplaceAll(partName, ".", "")
-	// Remove hyphens from the part names
 	partName = strings.ReplaceAll(partName, "'", "")
-	// Form the partId (<partType>-<partName>)
 	partId := fmt.Sprintf("%s-%s", partType, partName)
 	partsJson, err := getPartsJSON()
 	if err != nil {
-		return nil, err
+		return PartGene{}, err
 	}
 	if partGene, ok := partsJson[partId]; ok {
-		return &partGene, nil
+		return partGene, nil
 	}
-	return nil, errors.New(fmt.Sprintf("error finding suitable part gene for %s", partId))
+	return PartGene{}, errors.New(fmt.Sprint("cannot recognize part:", partId))
 }
 
 var binPartSkinMap = map[string]PartSkin{
@@ -343,26 +431,26 @@ var binPartSkinMap = map[string]PartSkin{
 	"010101010101": Xmas1,
 	"10":           Xmas2,
 	"11":           Mystic,
+	"0000":         GlobalSkin,
+	"0001":         Mystic,
+	"0011":         Japan,
+	"0100":         Xmas1,
+	"0101":         Xmas2,
 }
 
-// getPartSkin extracts the skin of the given part from the gene binary group. It may only return one among the four
-// values Global, Japan, Xmas, and Mystic.
-func getPartSkin(xmasBin string, regionBin string, skinBin string) (PartSkin, error) {
-	if len(skinBin) != 2 {
-		return "", errors.New("skin binary must be of length 2")
-	}
-	if skin, ok := binPartSkinMap[skinBin]; ok {
-		return skin, nil
-	}
+func getPartSkin(gbg *GeneBinGroup, skinBin string) (PartSkin, error) {
+	partSkin := binPartSkinMap[skinBin]
 	if skinBin == "00" {
-		if xmasBin == "010101010101" {
-			return Xmas1, nil
-		}
-		if skin, ok := binPartSkinMap[regionBin]; ok {
-			return skin, nil
+		if gbg.Xmas == "010101010101" {
+			partSkin = Xmas1
+		} else {
+			partSkin = binPartSkinMap[gbg.Region]
 		}
 	}
-	return "", errors.New("cannot recognize part skin")
+	if partSkin == "" {
+		return partSkin, errors.New(fmt.Sprint("cannot recognize part skin:", skinBin, gbg.Xmas))
+	}
+	return partSkin, nil
 }
 
 // getGeneQuality computes the gene quality of the Axie.
