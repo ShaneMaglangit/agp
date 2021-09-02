@@ -459,6 +459,7 @@ var binPartSkinMap = map[string]PartSkin{
 	"0011":         Japan,
 	"0100":         Xmas1,
 	"0101":         Xmas2,
+	"0010":         Bionic,
 }
 
 func getPartSkin(gbg *GeneBinGroup, skinBin string) (PartSkin, error) {

@@ -127,4 +127,5 @@ const (
 	Xmas1               = "xmas1"
 	Xmas2               = "xmas2"
 	Mystic              = "mystic"
+	Bionic              = "bionic"
 )
