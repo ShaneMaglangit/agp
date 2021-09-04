@@ -276,11 +276,23 @@ func getRegion(gbg *GeneBinGroup) (Region, error) {
 }
 
 var binTagMap = map[string]Tag{
-	"00000": NoTag, "00001": Origin, "00011": Meo1, "00100": Meo2,
+	"00000": NoTag, "00001": Origin, "00010": Agamogenesis, "00011": Meo1, "00100": Meo2,
 	"000000000000000": NoTag, "000000000000001": Origin, "000000000000010": Meo1, "000000000000011": Meo2,
 }
 
 func getTag(gbg *GeneBinGroup) (Tag, error) {
+	if gbg.Tag == "000000000000000" {
+		eyesBionic, _ := getPartSkin(gbg, gbg.Eyes[0:4])
+		earsBionic, _ := getPartSkin(gbg, gbg.Ears[0:4])
+		hornBionic, _ := getPartSkin(gbg, gbg.Horn[0:4])
+		mouthBionic, _ := getPartSkin(gbg, gbg.Mouth[0:4])
+		backBionic, _ := getPartSkin(gbg, gbg.Back[0:4])
+		tailBionic, _ := getPartSkin(gbg, gbg.Tail[0:4])
+		if eyesBionic == Bionic || earsBionic == Bionic || hornBionic == Bionic ||
+			mouthBionic == Bionic || backBionic == Bionic || tailBionic == Bionic {
+			return Agamogenesis, nil
+		}
+	}
 	if ret, ok := binTagMap[gbg.Tag]; ok {
 		return ret, nil
 	}
@@ -454,6 +466,7 @@ var binPartSkinMap = map[string]PartSkin{
 	"010101010101": Xmas1,
 	"10":           Xmas2,
 	"11":           Mystic,
+	"01":           Bionic,
 	"0000":         GlobalSkin,
 	"0001":         Mystic,
 	"0011":         Japan,

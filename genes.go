@@ -105,10 +105,11 @@ const (
 type Tag string
 
 const (
-	NoTag  Tag = ""
-	Origin     = "origin"
-	Meo1       = "meo1"
-	Meo2       = "meo2"
+	NoTag        Tag = ""
+	Agamogenesis     = "agamogenesis"
+	Origin           = "origin"
+	Meo1             = "meo1"
+	Meo2             = "meo2"
 )
 
 // BodySkin represents the special skin of an Axie's body. This can either be none (default) or Frosty.
