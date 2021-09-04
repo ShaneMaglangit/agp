@@ -244,10 +244,10 @@
     "specialGenes": "",
     "type": "back"
   },
-  "back-shoal-star": {
+  "back-1nd14n-5t4r": {
     "class": "reptile",
-    "name": "shoal-star",
-    "partId": "back-shoal-star",
+    "name": "1ND14N-5T4R",
+    "partId": "back-1nd14n-5t4r",
     "specialGenes": "bionic",
     "type": "back"
   },
@@ -755,10 +755,10 @@
     "specialGenes": "japan",
     "type": "eyes"
   },
-  "eyes-kotaro": {
+  "eyes-kotaro?": {
     "class": "bug",
-    "name": "Kotaro",
-    "partId": "eyes-kotaro",
+    "name": "Kotaro?",
+    "partId": "eyes-kotaro?",
     "specialGenes": "",
     "type": "eyes"
   },

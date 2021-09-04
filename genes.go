@@ -3,7 +3,6 @@ package agp
 // GeneBinGroup collectively stores each part of the parsed binary representation of the genes.
 type GeneBinGroup struct {
 	Class    string
-	Reserved string
 	Region   string
 	Tag      string
 	BodySkin string
@@ -106,10 +105,11 @@ const (
 type Tag string
 
 const (
-	NoTag  Tag = ""
-	Origin     = "origin"
-	Meo1       = "meo1"
-	Meo2       = "meo2"
+	NoTag        Tag = ""
+	Agamogenesis     = "agamogenesis"
+	Origin           = "origin"
+	Meo1             = "meo1"
+	Meo2             = "meo2"
 )
 
 // BodySkin represents the special skin of an Axie's body. This can either be none (default) or Frosty.
@@ -128,4 +128,5 @@ const (
 	Xmas1               = "xmas1"
 	Xmas2               = "xmas2"
 	Mystic              = "mystic"
+	Bionic              = "bionic"
 )
