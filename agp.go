@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// ParseHexDecode parses a given hex into a Gene object. This combines ParseHex and Decode into a single function.
+// ParseHexDecode parses a given 256 hex into a Gene object. This combines ParseHex and Decode into a single function.
 func ParseHexDecode(hex string) (Genes, error) {
 	gbg, err := ParseHex(hex)
 	if err != nil {
@@ -18,6 +18,7 @@ func ParseHexDecode(hex string) (Genes, error) {
 	return Decode(&gbg)
 }
 
+// ParseHexDecode512 parses a given 512 hex into a Gene object. This combines ParseHex512 and Decode512 into a single function.
 func ParseHexDecode512(hex string) (Genes, error) {
 	gbg, err := ParseHex512(hex)
 	if err != nil {
@@ -26,12 +27,15 @@ func ParseHexDecode512(hex string) (Genes, error) {
 	return Decode512(&gbg)
 }
 
+// ParseHex divide bits from the 256 hex representation of the string into their respective groups.
 func ParseHex(hex string) (GeneBinGroup, error) {
 	var gbg GeneBinGroup
+	// Convert hex into binary
 	bInt, err := hexutil.DecodeBig(hex)
 	if err != nil {
 		return gbg, err
 	}
+	// Append leading zeroes to fill the 256 bit requirement.
 	bStr := fmt.Sprintf("%0*s", 256, bInt.Text(2))
 	gbg.Class = bStr[0:4]
 	gbg.Region = bStr[8:13]
@@ -49,26 +53,33 @@ func ParseHex(hex string) (GeneBinGroup, error) {
 	return gbg, nil
 }
 
+// hexToBin converts a given 256 bit hex into binary.
 func hexToBin(hex string) (string, error) {
+	// Remove leading zeroes.
 	p := regexp.MustCompile("^0+")
 	str := p.ReplaceAllString(hex, "")
 	bInt, err := hexutil.DecodeBig("0x" + str)
 	if err != nil {
 		return "", err
 	}
+	// Append back the leading zeroes to fil lthe 256 bits.
 	return fmt.Sprintf("%0*s", 256, bInt.Text(2)), nil
 }
 
+// ParseHex512 divide bits from the 512 hex representation of the string into their respective groups.
 func ParseHex512(hex string) (GeneBinGroup, error) {
 	var gbg GeneBinGroup
+	// Convert first 256 bit hex into binary.
 	bStrL, err := hexToBin(hex[2:][:len(hex[2:])-64])
 	if err != nil {
 		return gbg, err
 	}
+	// Convert the next 256 bit hex into binary.
 	bStrR, err := hexToBin(hex[2:][len(hex[2:])-64:])
 	if err != nil {
 		return gbg, err
 	}
+	// Merged the converted binaries.
 	bStr := bStrL + bStrR
 	gbg.Class = bStr[0:5]
 	gbg.Region = bStr[22:40]
@@ -85,6 +96,7 @@ func ParseHex512(hex string) (GeneBinGroup, error) {
 	return gbg, nil
 }
 
+// Decode parses the grouped binary and extracts the Axie information into a Gene object.
 func Decode(gbg *GeneBinGroup) (Genes, error) {
 	var genes Genes
 	class, err := getClass(gbg)
@@ -151,6 +163,7 @@ func Decode(gbg *GeneBinGroup) (Genes, error) {
 	return genes, nil
 }
 
+// Decode512 parses the grouped binary and extracts the Axie information into a Gene object.
 func Decode512(gbg *GeneBinGroup) (Genes, error) {
 	var genes Genes
 	class, err := getClass(gbg)
@@ -217,27 +230,14 @@ func Decode512(gbg *GeneBinGroup) (Genes, error) {
 	return genes, nil
 }
 
+// binClassMap contains the details to map binary values into the class that it represents.
 var binClassMap = map[string]Class{
-	"0000":  Beast,
-	"0001":  Bug,
-	"0010":  Bird,
-	"0011":  Plant,
-	"0100":  Aquatic,
-	"0101":  Reptile,
-	"1000":  Mech,
-	"1010":  Dusk,
-	"1001":  Dawn,
-	"00000": Beast,
-	"00001": Bug,
-	"00010": Bird,
-	"00011": Plant,
-	"00100": Aquatic,
-	"00101": Reptile,
-	"10000": Mech,
-	"10001": Dusk,
-	"10010": Dawn,
+	"0000": Beast, "0001": Bug, "0010": Bird, "0011": Plant, "0100": Aquatic, "0101": Reptile,
+	"1000": Mech, "1010": Dusk, "1001": Dawn, "00000": Beast, "00001": Bug, "00010": Bird, "00011": Plant,
+	"00100": Aquatic, "00101": Reptile, "10000": Mech, "10001": Dusk, "10010": Dawn,
 }
 
+// getClass parses binary values into the class that it represents.
 func getClass(gbg *GeneBinGroup) (Class, error) {
 	if ret, ok := binClassMap[gbg.Class]; ok {
 		return ret, nil
@@ -245,14 +245,16 @@ func getClass(gbg *GeneBinGroup) (Class, error) {
 	return "", errors.New(fmt.Sprint("cannot recognize class:", gbg.Class))
 }
 
+// binRegionMap contains the details to map binary values into the region that it represents.
 var binRegionMap = map[string]Region{"00000": Global, "00001": Japan}
 
+// getTag parses binary values into the Tag it represents.
 func getRegion(gbg *GeneBinGroup) (Region, error) {
 	if ret, ok := binRegionMap[gbg.Region]; ok {
 		return ret, nil
 	}
 	if len(gbg.Region) <= 4 {
-		return "", errors.New(fmt.Sprint("cannot recognize region:", gbg.Region))
+		return Global, errors.New(fmt.Sprint("cannot recognize region:", gbg.Region))
 	}
 	if gbg.Eyes[0:4] == "0011" {
 		return Japan, nil
@@ -275,11 +277,13 @@ func getRegion(gbg *GeneBinGroup) (Region, error) {
 	return Global, nil
 }
 
+// binTagMap contains the details to map binary values into the tag that it represents.
 var binTagMap = map[string]Tag{
 	"00000": NoTag, "00001": Origin, "00010": Agamogenesis, "00011": Meo1, "00100": Meo2,
 	"000000000000000": NoTag, "000000000000001": Origin, "000000000000010": Meo1, "000000000000011": Meo2,
 }
 
+// getRegion parses binary values into the region that it represents.
 func getTag(gbg *GeneBinGroup) (Tag, error) {
 	if gbg.Tag == "000000000000000" {
 		eyesBionic, _ := getPartSkin(gbg, gbg.Eyes[0:4])
@@ -299,8 +303,10 @@ func getTag(gbg *GeneBinGroup) (Tag, error) {
 	return NoTag, errors.New(fmt.Sprint("cannot recognize tag:", gbg.Tag))
 }
 
+// binBodySkinMap contains the details to map binary values into the body skin that it represents.
 var binBodySkinMap = map[string]BodySkin{"0000": DefBodySkin, "0001": Frosty}
 
+// getBodySkin parses binary values into the BodySkin it represents.
 func getBodySkin(gbg *GeneBinGroup) (BodySkin, error) {
 	if ret, ok := binBodySkinMap[gbg.BodySkin]; ok {
 		return ret, nil
@@ -308,11 +314,13 @@ func getBodySkin(gbg *GeneBinGroup) (BodySkin, error) {
 	return DefBodySkin, errors.New(fmt.Sprint("cannot recognize body skin", gbg.Tag))
 }
 
+// getPatternGenes parses binary values into the patterns that they represent.
 func getPatternGenes(gbg *GeneBinGroup) (PatternGene, error) {
 	bSize := len(gbg.Pattern) / 3
 	return PatternGene{gbg.Pattern[0:bSize], gbg.Pattern[bSize : bSize*2], gbg.Pattern[bSize*2 : bSize*3]}, nil
 }
 
+// classColorMap contains the details to map binary values into the class colors it represents.
 var classColorMap = map[Class]map[string]string{
 	Beast:   {"0010": "ffec51", "0011": "ffa12a", "0100": "f0c66e", "0110": "60afce", "0000": "ffffff"},
 	Bug:     {"0010": "ff7183", "0011": "ff6d61", "0100": "f74e4e", "0000": "ffffff"},
@@ -325,6 +333,7 @@ var classColorMap = map[Class]map[string]string{
 	Dawn:    {"0010": "D9D9D9", "0011": "D9D9D9", "0100": "D9D9D9", "0110": "D9D9D9", "0000": "ffffff"},
 }
 
+// getColorGenes parses binary values into the colors that they represent.
 func getColorGenes(gbg *GeneBinGroup) (ColorGene, error) {
 	bSize := len(gbg.Color) / 3
 	class, err := getClass(gbg)
@@ -341,6 +350,7 @@ func getColorGenes(gbg *GeneBinGroup) (ColorGene, error) {
 	}, nil
 }
 
+// getPart parses binary values into the set of part genes that they represent.
 func getPart(gbg *GeneBinGroup, partBin string, partType PartType) (Part, error) {
 	var part Part
 	dClass := binClassMap[partBin[2:6]]
@@ -384,6 +394,7 @@ func getPart(gbg *GeneBinGroup, partBin string, partType PartType) (Part, error)
 	return part, nil
 }
 
+// getPart512 parses binary values into the set of part genes that they represent.
 func getPart512(gbg *GeneBinGroup, partBin string, partType PartType) (Part, error) {
 	var part Part
 	dClass := binClassMap[partBin[4:9]]
@@ -427,6 +438,7 @@ func getPart512(gbg *GeneBinGroup, partBin string, partType PartType) (Part, err
 	return part, nil
 }
 
+// getPartName parses binary values into the part name that they represent.
 func getPartName(class Class, partType PartType, regionBin string, partBin string, skin PartSkin) (string, error) {
 	traitsJson, err := getTraitsJSON()
 	if err != nil {
@@ -445,6 +457,7 @@ func getPartName(class Class, partType PartType, regionBin string, partBin strin
 	return "", errors.New(fmt.Sprint("cannot recognize part name:", partType, regionBin, partBin))
 }
 
+// getPartGene parses binary values and extract the part information that it represents.
 func getPartGene(partType PartType, partName string) (PartGene, error) {
 	partName = strings.ReplaceAll(strings.ToLower(partName), " ", "-")
 	partName = strings.ReplaceAll(partName, ".", "")
@@ -460,6 +473,7 @@ func getPartGene(partType PartType, partName string) (PartGene, error) {
 	return PartGene{}, errors.New(fmt.Sprint("cannot recognize part:", partId))
 }
 
+// binPartSkinMap contains the details to map binary values into the part skin that it represents.
 var binPartSkinMap = map[string]PartSkin{
 	"00000":        GlobalSkin,
 	"00001":        JapanSkin,
@@ -475,6 +489,7 @@ var binPartSkinMap = map[string]PartSkin{
 	"0010":         Bionic,
 }
 
+// getPartSkin parses binary values and extract the part skin that it represents.
 func getPartSkin(gbg *GeneBinGroup, skinBin string) (PartSkin, error) {
 	partSkin := binPartSkinMap[skinBin]
 	if skinBin == "00" {
