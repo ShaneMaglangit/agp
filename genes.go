@@ -120,6 +120,7 @@ const (
 	Frosty               = "frosty"
 )
 
+// PartSkin represents the special skin of an Axie's part. This can be Global, Japan, Xmas, Mystic, Bionic (Agamogenesis)
 type PartSkin string
 
 const (

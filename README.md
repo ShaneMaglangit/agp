@@ -7,7 +7,7 @@ Package `agp` is a gene parsing package for Axie Infinity.
 
 The name agp stands for "Axie Gene Parser" which decodes the hex representation of an Axie's gene into a human readable format.
 
-> Only supports 256 bit genes
+> Now supports both 256 and 512 bit hex genes
 
 ---
 
@@ -27,6 +27,8 @@ go get -u github.com/shanemaglangit/agp
 ## Usage
 
 > Starting on v1.0.3, `ParseHexDecode` was introduced which combines both `ParseHex` and `Decode` into a single function.
+
+> Use ParseHex512(), Decode512(), and ParseHexDecode512() for 512 bits respectively.
 
 To get started, you'll first need to get the gene of an Axie in hex. You may use the [Axie Infinity GraphQL endpoint](https://axie-graphql.web.app/) to get this detail. For this example, let's use the hex `0x11c642400a028ca14a428c20cc011080c61180a0820180604233082`
 
