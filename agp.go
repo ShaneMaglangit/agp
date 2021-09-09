@@ -31,7 +31,7 @@ func ParseHexDecode512(hex string) (Genes, error) {
 func ParseHex(hex string) (GeneBinGroup, error) {
 	var gbg GeneBinGroup
 	// Convert hex into binary
-	bInt, err := hexutil.DecodeBig(hex)
+	bInt, err := hexutil.DecodeBig("0x" + strings.TrimLeft(hex[2:], "0"))
 	if err != nil {
 		return gbg, err
 	}
@@ -62,7 +62,7 @@ func hexToBin(hex string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// Append back the leading zeroes to fil lthe 256 bits.
+	// Append back the leading zeroes to fill the 256 bits.
 	return fmt.Sprintf("%0*s", 256, bInt.Text(2)), nil
 }
 
@@ -248,7 +248,7 @@ func getClass(gbg *GeneBinGroup) (Class, error) {
 // binRegionMap contains the details to map binary values into the region that it represents.
 var binRegionMap = map[string]Region{"00000": Global, "00001": Japan}
 
-// getTag parses binary values into the Tag it represents.
+// getRegion parses binary values into the region that it represents.
 func getRegion(gbg *GeneBinGroup) (Region, error) {
 	if ret, ok := binRegionMap[gbg.Region]; ok {
 		return ret, nil
@@ -283,7 +283,7 @@ var binTagMap = map[string]Tag{
 	"000000000000000": NoTag, "000000000000001": Origin, "000000000000010": Meo1, "000000000000011": Meo2,
 }
 
-// getRegion parses binary values into the region that it represents.
+// getTag parses binary values into the Tag it represents.
 func getTag(gbg *GeneBinGroup) (Tag, error) {
 	if gbg.Tag == "000000000000000" {
 		eyesBionic, _ := getPartSkin(gbg, gbg.Eyes[0:4])
