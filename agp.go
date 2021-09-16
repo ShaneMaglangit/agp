@@ -234,7 +234,7 @@ func Decode512(gbg *GeneBinGroup) (Genes, error) {
 var binClassMap = map[string]Class{
 	"0000": Beast, "0001": Bug, "0010": Bird, "0011": Plant, "0100": Aquatic, "0101": Reptile,
 	"1000": Mech, "1010": Dusk, "1001": Dawn, "00000": Beast, "00001": Bug, "00010": Bird, "00011": Plant,
-	"00100": Aquatic, "00101": Reptile, "10000": Mech, "10001": Dusk, "10010": Dawn,
+	"00100": Aquatic, "00101": Reptile, "10000": Mech, "10001": Dawn, "10010": Dusk,
 }
 
 // getClass parses binary values into the class that it represents.
